@@ -37,7 +37,41 @@ cmake_dependent_option(YAML_MSVC_SHARED_RT
   "CMAKE_SYSTEM_NAME MATCHES Windows" OFF)
 set(YAML_CPP_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/yaml-cpp"
   CACHE STRING "Path to install the CMake package to")
- 
+
+if (YAML_CPP_BUILD_TESTS AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.10")
+  find_program(cppcheck NAMES cppcheck)
+  if (NOT cppcheck STREQUAL "cppcheck-NOTFOUND")
+    option(YAML_CPP_CHECK "Run cppcheck static code analysis" ON)
+  endif()
+endif()
+
+if (YAML_CPP_CHECK)
+        set(CMAKE_CXX_CPPCHECK "${cppcheck}"
+                "--enable=all"
+                "--inconclusive"
+                "--quiet"
+                "--suppress=*:*/gtest-*"
+                "--suppress=*:*/test/*"
+                "--suppress=assertWithSideEffect"
+                "--suppress=bitwiseOnBoolean"
+                "--suppress=clarifyCondition"
+                "--suppress=constParameter"
+                "--suppress=functionConst"
+                "--suppress=functionStatic"
+                "--suppress=missingIncludeSystem"
+                "--suppress=missingOverride"
+                "--suppress=noExplicitConstructor"
+                "--suppress=passedByValue"
+                "--suppress=redundantAssignment"
+                "--suppress=unmatchedSuppression"
+                "--suppress=unreachableCode"
+                "--suppress=unreadVariable"
+                "--suppress=unusedFunction"
+                "--suppress=unusedVariable"
+                "--suppress=useStlAlgorithm"
+        )
+endif()
+
 if (YAML_CPP_FORMAT_SOURCE)
     find_program(YAML_CPP_CLANG_FORMAT_EXE NAMES clang-format)
 endif()
