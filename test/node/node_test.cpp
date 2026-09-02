@@ -50,7 +50,6 @@ struct Vec3 {
   }
 };
 
-#ifdef YAML_CPP_USE_OPTIONAL
 struct NonDefCtorVec3 {
   double x, y, z;
   NonDefCtorVec3(double x, double y, double z) : x(x), y(y), z(z) {}
@@ -58,7 +57,6 @@ struct NonDefCtorVec3 {
     return x == rhs.x && y == rhs.y && z == rhs.z;
   }
 };
-#endif
 
 }  // anonymous namespace
 
@@ -97,19 +95,20 @@ struct convert<Vec3> {
   }
 };
 
-#ifdef YAML_CPP_USE_OPTIONAL
 template <>
-struct convert<std::optional<NonDefCtorVec3>> {
-  static bool decode(const Node& node, std::optional<NonDefCtorVec3>& rhs) {
+struct convert<NonDefCtorVec3> {
+  static auto decode(const Node& node) -> expected<NonDefCtorVec3> {
     if (!node.IsSequence() || node.size() != 3) {
-      return false;
+      return unexpected{};
     }
-    rhs.emplace(node[0].as<double>(), node[1].as<double>(), node[2].as<double>());
-
-    return true;
+    return expected<NonDefCtorVec3> {
+        node[0].as<double>(),
+        node[1].as<double>(),
+        node[2].as<double>()
+    };
   }
 };
-#endif
+
 
 namespace {
 TEST(NodeTest, SimpleScalar) {
@@ -975,16 +974,12 @@ TEST(NodeTest, CustomClassDecoding) {
 }
 
 TEST(NodeTest, CustomNonDefaultConstructibleClassDecoding) {
-#ifdef YAML_CPP_USE_OPTIONAL
   YAML::Node node;
   node.push_back(1.0);
   node.push_back(2.0);
   node.push_back(3.0);
   ASSERT_TRUE(node.IsSequence());
   EXPECT_EQ(node.as<NonDefCtorVec3>(), (NonDefCtorVec3{1.0, 2.0, 3.0}));
-#else
-  GTEST_SKIP() << "Compile with C++17 for customizing non-default-constructible custom types.";
-#endif
 }
 
 class NodeEmitterTest : public ::testing::Test {

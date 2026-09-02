@@ -12,19 +12,10 @@
 #include "yaml-cpp/node/detail/node.h"
 #include "yaml-cpp/node/iterator.h"
 #include "yaml-cpp/node/node.h"
+#include "yaml-cpp/expected.h"
 #include <sstream>
 #include <string>
-
-// Check YAML_CPP_USE_OPTIONAL is set and language standard provides supports
-// if available and supported include required header
-// otherwise remove YAML_CPP_USE_OPTIONAL definition
-#ifdef YAML_CPP_USE_OPTIONAL
-#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
-#include <optional>
-#else
-#undef YAML_CPP_USE_OPTIONAL
-#endif
-#endif
+#include <utility>
 
 namespace YAML {
 inline Node::Node()
@@ -102,56 +93,33 @@ inline NodeType::value Node::Type() const {
   return m_pNode ? m_pNode->type() : NodeType::Null;
 }
 
-// access
-
-// template helpers
-#ifdef YAML_CPP_USE_OPTIONAL
+// fallback expected converter
 template <typename T>
-struct decode_box : std::optional<T> {
-  decode_box() = default;
-  template <typename S>
-  decode_box(S&&) {}
-};
-
-template <typename T>
-struct convert<decode_box<T>> {
-  static bool decode(const Node& node, decode_box<T>& rhs) {
-    return convert<std::optional<T>>::decode(node, rhs);
+struct convert<expected<T>> {
+  static auto decode(const Node& node) -> expected<T> {
+    return decode_impl<T>(node, 0);
   }
-};
-template <typename T>
-struct convert<std::optional<T>> {
-  static bool decode(const Node& node, std::optional<T>& rhs) {
+
+  template <typename T2 = T>
+  static auto decode_impl(const Node& node, long long x) -> expected<T> {
     if (node.IsNull()) {
-      return false;
+      return unexpected{};
     }
-    rhs.emplace();
-    if (!convert<T>::decode(node, *rhs)) {
-      rhs.reset();
-      return false;
+    T t;
+    if (!convert<T>::decode(node, t)) {
+      return unexpected{};
     }
-    return true;
+    return expected<T>{std::move(t)};
+  }
+
+  template <typename T2 = T>
+  static auto decode_impl(const Node& node, int x) -> decltype(convert<T2>::decode(std::declval<Node>()))  {
+    if (node.IsNull()) {
+      return unexpected{};
+    }
+    return convert<T>::decode(node);
   }
 };
-
-
-#else
-
-template <typename T>
-struct decode_box {
-  T t;
-  T& operator*() {
-    return t;
-  }
-};
-template <typename T>
-struct convert<decode_box<T>> {
-  static bool decode(const Node& node, decode_box<T>& rhs) {
-    return convert<T>::decode(node, *rhs);
-  }
-};
-
-#endif
 
 template <typename T, typename S>
 struct as_if {
@@ -162,10 +130,12 @@ struct as_if {
     if (!node.m_pNode)
       return fallback;
 
-    decode_box<T> t{fallback};
-    if (convert<decltype(t)>::decode(node, t))
-      return *t;
-    return fallback;
+    auto t = convert<expected<T>>::decode(node);
+
+    if (!t) {
+      return fallback;
+    }
+    return *t;
   }
 };
 
@@ -192,10 +162,11 @@ struct as_if<T, void> {
     if (!node.m_pNode) // no fallback
       throw InvalidNode(node.m_invalidKey);
 
-    decode_box<T> t;
-    if (convert<decltype(t)>::decode(node, t))
-      return *t;
-    throw TypedBadConversion<T>(node.Mark());
+    auto t = convert<expected<T>>::decode(node);
+    if (!t) {
+        throw TypedBadConversion<T>(node.Mark());
+    }
+    return *t;
   }
 };
 

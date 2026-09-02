@@ -143,16 +143,6 @@ write_basic_package_version_file(
 
 configure_file(yaml-cpp.pc.in yaml-cpp.pc @ONLY)
 
-set(YAML_CPP_USE_OPTIONAL_DEFAULT OFF)
-get_target_property(YAML_CPP_CXX_STANDARD yaml-cpp CXX_STANDARD)
-if ("${YAML_CPP_CXX_STANDARD}" VERSION_GREATER_EQUAL 17)
-    set(YAML_CPP_USE_OPTIONAL_DEFAULT ON)
-endif()
-option(YAML_CPP_USE_OPTIONAL "Support for non-default constructible 'convert` overloads (requires c++17 and newer)" "${YAML_CPP_USE_OPTIONAL_DEFAULT}")
-if (YAML_CPP_USE_OPTIONAL)
-  target_compile_definitions(yaml-cpp PUBLIC YAML_CPP_USE_OPTIONAL)
-endif()
-
 if (YAML_CPP_INSTALL)
   install(TARGETS yaml-cpp
     EXPORT yaml-cpp-targets

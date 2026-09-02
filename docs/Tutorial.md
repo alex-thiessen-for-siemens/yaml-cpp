@@ -200,8 +200,8 @@ Vec3 v = node["start"].as<Vec3>();
 node["end"] = Vec3(2, -1, 0);
 ```
 
-## Non-default constructible types (requires c++17 and newer)
-Yaml-cpp also supports types that are not default constructible. For this one need to specialize `YAML::convert<std::optional<>>`.
+## Non-default constructible types
+Yaml-cpp also supports types that are not default constructible. For this we need to return the `YAML::expected` type
 Assuming you have:
 
 ```cpp
@@ -217,17 +217,16 @@ you could write (for encoding the previous `convert<Vec3>` with the `encode` met
 ```cpp
 namespace YAML {
 template<>
-struct convert<std::optional<Vec3>> {
-  static bool decode(const Node& node, std::optional<Vec3>& rhs) {
+struct convert<Vec3> {
+  static bool decode(const Node& node) -> expected<Vec3> {
     if(!node.IsSequence() || node.size() != 3) {
-      return false;
+      return unexpected{};
     }
-    rhs.emplace(
+    return expected<Vec3> {
         node[0].as<double>(),
         node[1].as<double>(),
         node[2].as<double>()
-    );
-    return true;
+    };
   }
 };
 }
