@@ -17,6 +17,12 @@ is baseline debt, not permission to rewrite that line. Preserve it, use a
 line-scoped or baseline-aware check, and record the limitation rather than
 expanding the contribution. Only change an unrelated line when the user
 explicitly expands scope or the line is required for the requested behavior.
+Review corrections caused by the feature belong in the feature history. Before
+publication, fold them into the existing feature commit or logical series
+with an amend or fixup/autosquash; do not publish a correction-only commit for
+the same finding. Never rewrite user-authored or shared history without
+explicit approval. After a branch is published, obtain that approval before
+force-pushing a folded history.
 
 Every behavior change needs a deterministic regression in the test suite that
 owns the behavior. Test valid inputs and the relevant boundary or malformed

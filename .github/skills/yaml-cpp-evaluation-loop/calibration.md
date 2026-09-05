@@ -16,4 +16,6 @@ invariant, preserve valid boundary behavior, add the owning regression, pass
 the selected deterministic checks, and leave no unresolved high-confidence
 review blocker. It must also preserve pre-existing lines outside the requested
 hunks; a touched file is not permission to normalize unrelated code. A
-smaller patch is preferred when it provides the same evidence.
+smaller patch is preferred when it provides the same evidence, and any
+feature-introduced review repair must be folded into the feature history before
+publication.

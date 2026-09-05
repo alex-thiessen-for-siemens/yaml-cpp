@@ -22,7 +22,10 @@ commit. Confirm:
 * no private Copilot setup files, session ledgers, generated documentation, or
   unrelated cleanup will appear in the upstream PR. Pre-existing formatting
   or static-analysis findings outside changed hunks are preserved rather than
-  “fixed” opportunistically.
+  “fixed” opportunistically;
+* feature-introduced review repairs are folded into the relevant feature
+  commit or logical series. A correction-only commit is a readiness blocker
+  unless the user explicitly requested an incremental history.
 
 Run `/unslop` only after the technical review. Apply it to the commit message,
 PR title/body, or a concise review reply. Preserve every fact, number,
@@ -33,8 +36,10 @@ to source, tests, public documentation, or upstream text.
 If the current work began on the private `llm-contribute` setup branch, use
 `export-clean-branch.sh` to create a contribution branch from the upstream
 base. That script carries only the contribution diff and leaves setup files
-out of the final tree. Inspect the staged file list before committing. The
-final comparison with the upstream base must contain only contribution files.
+out of the final tree. Inspect the staged file list before committing. Fold
+all review repairs before this export, inspect `git log BASE..HEAD`, and ensure
+the final comparison with the upstream base contains only contribution files
+and no correction-only commit.
 
 If the current CI, contribution rules, accepted patch patterns, or maintainer
 culture have changed since calibration, run

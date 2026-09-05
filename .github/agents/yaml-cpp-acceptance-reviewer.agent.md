@@ -24,6 +24,8 @@ Check that the change:
   private Copilot setup file in the final upstream comparison;
 * preserves pre-existing findings on unchanged lines instead of widening the
   patch to make a file-level tool pass;
+* folds feature-introduced review repairs into the feature commit or logical
+  series instead of leaving correction-only commits in the published history;
 * uses an imperative commit message with factual claims only.
 
 If the repository's current CI, contribution rules, or accepted patch patterns

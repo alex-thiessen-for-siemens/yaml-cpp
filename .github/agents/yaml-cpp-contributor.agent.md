@@ -11,8 +11,10 @@ beats confidence and no model gets a pass without the checks below.
 Use `/yaml-cpp-contribution-intake` before editing. Keep a private session
 evidence ledger. Read only the relevant source, tests, build files, and bounded
 history. Do not load vendored GoogleTest or paste full logs into context.
-Preserve unrelated user changes and never use reset, checkout, clean, or broad
-deletion to hide them.
+Preserve unrelated user changes and never use destructive reset, checkout,
+clean, or broad deletion to hide them. On a private feature branch, an
+explicitly approved amend or fixup/autosquash is allowed to fold a
+feature-introduced review repair.
 
 Work in this order:
 
@@ -36,13 +38,19 @@ Work in this order:
    `yaml-cpp-safety-reviewer` and `yaml-cpp-acceptance-reviewer` as bounded,
    read-only reviews when those agents are available. If either reports a
    concrete blocker, make the smallest repair and rerun the affected checks.
-   Do not churn on stylistic preferences.
+   Do not churn on stylistic preferences. If the blocker was introduced by
+   this feature, repair it in the feature commit or logical series; do not
+   append a correction-only commit.
 6. Use `/yaml-cpp-upstream-readiness`. If this session started on the private
    `llm-contribute` branch, commit the implementation on a temporary named
    branch and run
    `.github/skills/yaml-cpp-upstream-readiness/export-clean-branch.sh` to
    create the final branch from the upstream base. Verify the staged file list
-   excludes all private setup paths.
+   excludes all private setup paths. Before exporting or pushing, fold every
+   feature-introduced review repair with amend or fixup/autosquash and inspect
+   the complete commit history for correction-only commits. A published
+   branch may be force-pushed only after the user explicitly approves the
+   history rewrite.
 7. Only after the technical evidence is complete, use `/unslop` on the
    imperative commit message and any PR prose. Fact-check every sentence
    against the final diff and ledger. Do not use it for source, tests, or

@@ -26,11 +26,17 @@ Use this loop after intake and after each material repair:
    range remains a failure.
 4. Diagnose the first concrete failure. Inspect its output and affected code,
    make one focused repair, and rerun the affected phase. Do not rewrite a
-   passing area or restart all model reasoning for an unrelated failure.
+   passing area or restart all model reasoning for an unrelated failure. If
+   the failure was introduced by the feature, keep the repair in the existing
+   feature commit or logical series; use amend or fixup/autosquash rather than
+   adding a correction-only commit.
 5. After deterministic checks pass, run bounded safety and acceptance reviews.
    Repair only concrete blockers and rerun the affected checks.
-6. Stop when all required checks pass, every waiver is recorded, reviewers have
-   no actionable blocker, and the ledger states remaining limitations.
+6. Before upstream readiness, inspect the complete feature history. Fold
+   review repairs caused by the feature into the relevant commit or series,
+   then rerun affected checks. Stop only when all required checks pass, every
+   waiver is recorded, reviewers have no actionable blocker, the history has
+   no correction-only commit, and the ledger states remaining limitations.
 
 The evaluator covers CMake C++11 debug tests, sanitizer tests when the
 compiler supports them, changed-file formatting, clang-tidy, cppcheck,
