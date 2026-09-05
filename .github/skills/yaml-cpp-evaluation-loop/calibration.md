@@ -18,4 +18,6 @@ review blocker. It must also preserve pre-existing lines outside the requested
 hunks; a touched file is not permission to normalize unrelated code. A
 smaller patch is preferred when it provides the same evidence, and any
 feature-introduced review repair must be folded into the feature history before
-publication.
+publication. When the behavior is YAML-observable, it must also have a
+matching local-reference comparison with recorded schema and normalization;
+an unavailable matching implementation is an explicit limitation.

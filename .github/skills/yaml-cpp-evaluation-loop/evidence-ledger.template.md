@@ -19,6 +19,17 @@ This file belongs in private Copilot session artifacts, not in the repository.
 - Hypothesis:
 - Expected regression:
 
+## Local reference comparison
+
+- Applicable:
+- Implementation and version:
+- YAML version/schema/tags:
+- Fixture (private path):
+- Adapter paths:
+- Canonical normalization:
+- Command and result:
+- Limitation or mismatch:
+
 ## Changed files
 
 - Production:

@@ -29,6 +29,12 @@ owns the behavior. Test valid inputs and the relevant boundary or malformed
 input. For changes involving ownership, indexing, arithmetic, streams,
 iterators, parser state, or emitter state, trace the full lifetime and state
 transition path before editing. Make ownership and failure behavior explicit.
+For behavior observable through YAML syntax, tags, schemas, serialization, or
+public conversion APIs, also compare the result with a locally installed YAML
+implementation whose version and schema match the case. Use
+`/yaml-cpp-reference-check`; keep fixtures and adapters private to this
+machine, never fetch or call a remote oracle, and record an explicit
+not-applicable limitation when no matching local implementation exists.
 
 Use the repository's `.clang-format` and surrounding code style. Run the
 targeted CMake test first, then the maximum practical evaluation described by

@@ -17,22 +17,28 @@ Use this loop after intake and after each material repair:
    without changing the host. If Docker is unavailable, ask the user whether
    to install it or waive container coverage. Record the decision and scope. A
    waiver is not a pass.
-3. Run the smallest relevant CMake test and formatting check first. Then run
+3. For YAML-observable behavior changes, run
+   `/yaml-cpp-reference-check` after the targeted regression and before the
+   broad evaluator. Use only local adapters and a local fixture; record the
+   implementation version, schema, normalization, and result. A mismatch is
+   a failure. If no matching local implementation exists, record the explicit
+   limitation and do not call the behavior reference-verified.
+4. Run the smallest relevant CMake test and formatting check first. Then run
    `run-evaluation.sh` on the host or the container runner with the selected
    waivers. Both evaluators use isolated build directories and never change
    source files. Formatting is checked on changed line ranges, and cppcheck
    diagnostics are compared with those ranges, so a pre-existing finding on
    an untouched line must not force unrelated cleanup. A finding in a changed
    range remains a failure.
-4. Diagnose the first concrete failure. Inspect its output and affected code,
+5. Diagnose the first concrete failure. Inspect its output and affected code,
    make one focused repair, and rerun the affected phase. Do not rewrite a
    passing area or restart all model reasoning for an unrelated failure. If
    the failure was introduced by the feature, keep the repair in the existing
    feature commit or logical series; use amend or fixup/autosquash rather than
    adding a correction-only commit.
-5. After deterministic checks pass, run bounded safety and acceptance reviews.
+6. After deterministic checks pass, run bounded safety and acceptance reviews.
    Repair only concrete blockers and rerun the affected checks.
-6. Before upstream readiness, inspect the complete feature history. Fold
+7. Before upstream readiness, inspect the complete feature history. Fold
    review repairs caused by the feature into the relevant commit or series,
    then rerun affected checks. Stop only when all required checks pass, every
    waiver is recorded, reviewers have no actionable blocker, the history has
@@ -47,6 +53,10 @@ repository's checked-in `MODULE.bazel.lock`; lockfile freshness remains a
 repository CI concern. It never claims that unavailable or waived checks
 passed. GitHub's complete multi-platform matrix remains authoritative for
 platform-only behavior.
+
+The reference comparison is local-only evidence and does not replace
+yaml-test-suite or the upstream multi-platform CI matrix. It must not download
+packages, contact a hosted parser, or publish fixtures and results.
 
 Do not repair a baseline diagnostic merely to make this evaluator green.
 When a tool reports an unchanged-line finding, preserve the line, record it

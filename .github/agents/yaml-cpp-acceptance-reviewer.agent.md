@@ -14,6 +14,9 @@ Check that the change:
 * has a clear request, root cause, invariant, and focused file set;
 * adds a deterministic regression in the owning suite, including the relevant
   boundary or malformed input;
+* for YAML-observable behavior, includes private local-reference evidence with
+  a matching implementation version, schema, fixture, and normalization, or
+  records why no suitable local reference exists;
 * preserves C++11, public API/ABI, exception, ownership, package, and platform
   contracts;
 * updates CMake, Bazel, installation, or CI only when the change requires it;

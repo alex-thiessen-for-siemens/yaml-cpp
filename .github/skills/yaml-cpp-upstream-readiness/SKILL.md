@@ -11,6 +11,9 @@ commit. Confirm:
   ownership, and platform contracts;
 * the regression lives in the owning existing suite and covers the changed
   boundary plus nearby valid behavior;
+* YAML-observable behavior changes have local-reference evidence in the
+  private ledger, including implementation version, schema, fixture,
+  normalization, and result, or an explicit not-applicable limitation;
 * CMake source lists, Bazel targets or globs, installation, package checks,
   and CI implications were considered when relevant;
 * `git diff --check` passes, changed C++ files match `.clang-format`, and the

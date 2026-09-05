@@ -7,6 +7,12 @@ Use the test helpers and exception assertions already present. Keep tests
 deterministic, independent, and small enough to explain the boundary they
 protect. Spec tests are reserved for examples taken directly from the YAML
 specification.
+For a YAML-observable behavior change, add a private fixture and compare the
+candidate result with a matching locally installed YAML implementation using
+`/yaml-cpp-reference-check`. Record its version, schema, normalization, and
+result in the private ledger. Do not add the fixture or adapter to the
+upstream contribution, and do not use a network service as an oracle.
+
 Preserve existing test statements, indentation, and comments outside the
 requested hunk. Do not normalize a whole touched test file to satisfy a
 file-level formatter or static-analysis result. Findings on unchanged lines

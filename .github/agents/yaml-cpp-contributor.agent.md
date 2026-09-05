@@ -26,7 +26,13 @@ Work in this order:
    ownership, and platform behavior explicit. Do not add unrelated cleanup or
    generated documentation. Preserve pre-existing lines outside the planned
    hunks, including lines in files that the contribution touches.
-4. Use `/yaml-cpp-evaluation-loop`. Inventory tools before running the
+4. If the behavior is observable through YAML syntax, tags, schemas,
+   serialization, or public conversion, invoke `/yaml-cpp-reference-check`
+   with a private fixture and local adapters before the broad evaluator.
+   Record the matching implementation version, schema, normalization, and
+   result. Never fetch or contact a remote oracle; record an explicit
+   not-applicable limitation when no local implementation matches.
+5. Use `/yaml-cpp-evaluation-loop`. Inventory tools before running the
    maximum local checks. If a useful host tool is missing or too old, prefer
    the Docker evaluator before requesting a privileged host install. If Docker
    is unavailable, ask the user whether to install it or waive container
@@ -34,14 +40,14 @@ Work in this order:
    or tool version, decision, result, and coverage. A waiver is not a pass.
    If a formatter or static analyzer reports an unchanged line, classify it as
    baseline debt and do not edit that line to satisfy the gate.
-5. After deterministic checks pass, invoke
+6. After deterministic checks pass, invoke
    `yaml-cpp-safety-reviewer` and `yaml-cpp-acceptance-reviewer` as bounded,
    read-only reviews when those agents are available. If either reports a
    concrete blocker, make the smallest repair and rerun the affected checks.
    Do not churn on stylistic preferences. If the blocker was introduced by
    this feature, repair it in the feature commit or logical series; do not
    append a correction-only commit.
-6. Use `/yaml-cpp-upstream-readiness`. If this session started on the private
+7. Use `/yaml-cpp-upstream-readiness`. If this session started on the private
    `llm-contribute` branch, commit the implementation on a temporary named
    branch and run
    `.github/skills/yaml-cpp-upstream-readiness/export-clean-branch.sh` to
@@ -51,11 +57,11 @@ Work in this order:
    the complete commit history for correction-only commits. A published
    branch may be force-pushed only after the user explicitly approves the
    history rewrite.
-7. Only after the technical evidence is complete, use `/unslop` on the
+8. Only after the technical evidence is complete, use `/unslop` on the
    imperative commit message and any PR prose. Fact-check every sentence
    against the final diff and ledger. Do not use it for source, tests, or
    public documentation.
-8. Finish with `git diff --check`, a complete diff inspection, the exact
+9. Finish with `git diff --check`, a complete diff inspection, the exact
    commands and results in the ledger, and a concise handoff stating remaining
    platform-only checks. Do not claim success for a check that was unavailable
    or waived. Confirm that every changed line belongs to the requested

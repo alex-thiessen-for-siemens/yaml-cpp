@@ -26,9 +26,12 @@ edit the first plausible file.
    they are not part of the contribution unless the request depends on them.
 6. Before implementation, write a short hypothesis in the ledger:
    symptom, root cause, proposed correction, expected regression, risks, and
-   checks. If the request is genuinely ambiguous or would cause destructive
-   changes, ask the user. Otherwise choose the least surprising behavior and
-   proceed.
+   checks. For a behavior change, classify whether YAML syntax or a public
+   conversion can express it and identify a locally installed reference
+   implementation, version, schema, fixture, and canonical result. If no
+   matching local implementation exists, record an explicit limitation.
+   If the request is genuinely ambiguous or would cause destructive changes,
+   ask the user. Otherwise choose the least surprising behavior and proceed.
 
 The intake is complete only when another engineer could use the ledger to
 understand why the proposed files and test are the right scope.
