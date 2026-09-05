@@ -5,6 +5,11 @@ The `unslop` skill in `.github/skills/unslop` is imported from
 `pstack/skills/unslop`, using a Git subtree split. It is private workflow
 infrastructure, not part of an upstream yaml-cpp contribution.
 
+The initial import used source commit
+`93b00b89ef425a9c1bac0d0b317dfc49c930ac99` and split commit
+`f6028cffe32ef0f9d1c856221c02d110ed2d96ae`. The subtree merge commit is
+`804434a025e45ef6b67cd9052a186c9cbd2a7be7`.
+
 To update it, review the upstream change first, make sure the worktree is
 clean, and run:
 
