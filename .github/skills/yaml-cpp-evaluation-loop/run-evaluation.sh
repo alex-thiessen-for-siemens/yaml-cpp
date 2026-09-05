@@ -304,7 +304,8 @@ if ((${#cpp_files[@]} == 0)); then
   record "SKIP cppcheck: no changed C++ files"
 elif require_tool cppcheck; then
   run_step "cppcheck changed C++ files" cppcheck --enable=warning,style,performance,portability \
-    --error-exitcode=1 --std=c++11 -I include -I src "${cpp_files[@]}"
+    --check-level=exhaustive --error-exitcode=1 --std=c++11 -I include \
+    -I src "${cpp_files[@]}"
 fi
 
 sanitizer_build="$build_root/cmake-sanitizers"
