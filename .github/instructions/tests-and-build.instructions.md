@@ -12,6 +12,8 @@ candidate result with a matching locally installed YAML implementation using
 `/yaml-cpp-reference-check`. Record its version, schema, normalization, and
 result in the private ledger. Do not add the fixture or adapter to the
 upstream contribution, and do not use a network service as an oracle.
+For parser- or event-level behavior, also build the private libyaml adapter
+and record its parser-only scope separately from any native-value comparison.
 
 Preserve existing test statements, indentation, and comments outside the
 requested hunk. Do not normalize a whole touched test file to satisfy a

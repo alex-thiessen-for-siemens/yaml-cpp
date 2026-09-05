@@ -34,7 +34,10 @@ public conversion APIs, also compare the result with a locally installed YAML
 implementation whose version and schema match the case. Use
 `/yaml-cpp-reference-check`; keep fixtures and adapters private to this
 machine, never fetch or call a remote oracle, and record an explicit
-not-applicable limitation when no matching local implementation exists.
+not-applicable limitation when no matching local implementation exists. Use
+libyaml's local C event adapter as an additional parser/tag/scalar oracle when
+the change is observable at that layer; it does not validate native-value
+construction and must not replace a matching semantic implementation.
 
 Use the repository's `.clang-format` and surrounding code style. Run the
 targeted CMake test first, then the maximum practical evaluation described by

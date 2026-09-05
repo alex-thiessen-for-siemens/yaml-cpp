@@ -31,7 +31,10 @@ Work in this order:
    with a private fixture and local adapters before the broad evaluator.
    Record the matching implementation version, schema, normalization, and
    result. Never fetch or contact a remote oracle; record an explicit
-   not-applicable limitation when no local implementation matches.
+   not-applicable limitation when no local implementation matches. When the
+   behavior is parser- or event-observable, also use the private libyaml C
+   adapter as a parser-only oracle; keep it separate from native-value
+   evidence because libyaml does not construct resolved values.
 5. Use `/yaml-cpp-evaluation-loop`. Inventory tools before running the
    maximum local checks. If a useful host tool is missing or too old, prefer
    the Docker evaluator before requesting a privileged host install. If Docker

@@ -28,6 +28,7 @@ This file belongs in private Copilot session artifacts, not in the repository.
 - Adapter paths:
 - Canonical normalization:
 - Command and result:
+- Additional libyaml C parser oracle and version/scope:
 - Limitation or mismatch:
 
 ## Changed files

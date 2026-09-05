@@ -22,7 +22,8 @@ for a meaningful release cycle. Do not refresh from model intuition.
    Recheck whether the selected local reference implementations still match
    the YAML versions, schemas, and extension behavior used by the project;
    local-reference availability is evidence coverage, not a new upstream
-   dependency.
+   dependency. Recheck libyaml's parser/emitter scope separately and do not
+   promote it to a constructor oracle.
 4. Run the host inventory and the container evaluator. If Docker is missing or
    its daemon is unavailable, ask the user to install or waive container
    coverage. Use QEMU only when Docker Buildx exposes the target platform with

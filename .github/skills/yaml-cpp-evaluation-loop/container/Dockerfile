@@ -23,7 +23,9 @@ RUN apt-get update \
     curl \
     default-jre-headless \
     git \
+    libyaml-dev \
     ninja-build \
+    pkg-config \
     valgrind \
   && case "$TARGETARCH" in \
        amd64) bazel_asset="bazel-${BAZEL_VERSION}-linux-x86_64"; \

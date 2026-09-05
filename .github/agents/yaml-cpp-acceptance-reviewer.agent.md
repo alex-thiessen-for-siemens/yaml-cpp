@@ -17,6 +17,9 @@ Check that the change:
 * for YAML-observable behavior, includes private local-reference evidence with
   a matching implementation version, schema, fixture, and normalization, or
   records why no suitable local reference exists;
+* for parser- or event-level behavior, includes separate libyaml C evidence
+  when available and does not mistake its parser-only result for native-value
+  construction evidence;
 * preserves C++11, public API/ABI, exception, ownership, package, and platform
   contracts;
 * updates CMake, Bazel, installation, or CI only when the change requires it;

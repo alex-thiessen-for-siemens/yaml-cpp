@@ -20,9 +20,12 @@ Use this loop after intake and after each material repair:
 3. For YAML-observable behavior changes, run
    `/yaml-cpp-reference-check` after the targeted regression and before the
    broad evaluator. Use only local adapters and a local fixture; record the
-   implementation version, schema, normalization, and result. A mismatch is
-   a failure. If no matching local implementation exists, record the explicit
-   limitation and do not call the behavior reference-verified.
+   implementation version, schema, normalization, and result. For parser- or
+   event-level behavior, include the private libyaml C adapter as an
+   additional parser-only comparison. For resolved or constructed values,
+   retain a matching semantic implementation as a separate comparison. A
+   mismatch is a failure. If no matching local implementation exists, record
+   the explicit limitation and do not call the behavior reference-verified.
 4. Run the smallest relevant CMake test and formatting check first. Then run
    `run-evaluation.sh` on the host or the container runner with the selected
    waivers. Both evaluators use isolated build directories and never change

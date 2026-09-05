@@ -14,6 +14,9 @@ commit. Confirm:
 * YAML-observable behavior changes have local-reference evidence in the
   private ledger, including implementation version, schema, fixture,
   normalization, and result, or an explicit not-applicable limitation;
+* parser- or event-level behavior also records separate local libyaml C
+  evidence when available, without treating libyaml as a native-value
+  constructor;
 * CMake source lists, Bazel targets or globs, installation, package checks,
   and CI implications were considered when relevant;
 * `git diff --check` passes, changed C++ files match `.clang-format`, and the

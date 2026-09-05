@@ -125,7 +125,9 @@ if [[ -n "$ledger_path" ]]; then
       'for tool in bazel cmake clang-format clang-tidy cppcheck valgrind; do
          printf "%s: " "$tool"
          "$tool" --version 2>&1 | head -1
-       done'
+       done
+       printf "libyaml: "
+       pkg-config --modversion yaml-0.1'
   } | tee -a "$ledger_path"
 fi
 

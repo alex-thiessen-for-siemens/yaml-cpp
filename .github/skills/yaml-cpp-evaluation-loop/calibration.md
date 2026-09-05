@@ -20,4 +20,7 @@ smaller patch is preferred when it provides the same evidence, and any
 feature-introduced review repair must be folded into the feature history before
 publication. When the behavior is YAML-observable, it must also have a
 matching local-reference comparison with recorded schema and normalization;
-an unavailable matching implementation is an explicit limitation.
+an unavailable matching implementation is an explicit limitation. Parser- or
+event-level behavior should add separate libyaml C evidence when available,
+while constructed-value behavior still requires a matching semantic
+implementation.

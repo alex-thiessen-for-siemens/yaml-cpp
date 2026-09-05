@@ -9,12 +9,12 @@ missing, too old for the repository, or would require a privileged install:
   --ledger /path/to/private/evidence-ledger.md
 ```
 
-The image installs the current Debian Trixie build tools, Valgrind, and the
-official Bazel 9.2.0 Linux binary. The Bazel binaries are downloaded over
-HTTPS and checked against the SHA-256 values in the Dockerfile. Update the
-base-image digest, version, and both architecture checksums together when the
-project or Bazel support moves on. The evaluator records the image and tool
-versions in the private ledger.
+The image installs the current Debian Trixie build tools, Valgrind, the
+libyaml C parser development files, and the official Bazel 9.2.0 Linux
+binary. The Bazel binaries are downloaded over HTTPS and checked against the
+SHA-256 values in the Dockerfile. Update the base-image digest, version, and
+both architecture checksums together when the project or Bazel support moves
+on. The evaluator records the image and tool versions in the private ledger.
 
 The runner mounts only the repository and, when requested, the ledger's
 parent directory. It runs as the invoking user's UID and keeps its default
