@@ -1,0 +1,51 @@
+# yaml-cpp contribution evidence ledger
+
+This file belongs in private Copilot session artifacts, not in the repository.
+
+## Request and base
+
+- Request:
+- Base ref:
+- Contribution branch:
+- User constraints:
+
+## Scope and invariant
+
+- Classification:
+- Observable behavior or acceptance condition:
+- Affected implementation path:
+- Owning test suite:
+- Invariant:
+- Hypothesis:
+- Expected regression:
+
+## Changed files
+
+- Production:
+- Tests:
+- Build or CI:
+- Other:
+
+## Tool decisions
+
+| Tool/check | Version | Installed | User decision | Coverage or reason |
+| --- | --- | --- | --- | --- |
+
+## Evaluation
+
+| Phase | Command | Exit status | Result |
+| --- | --- | --- | --- |
+
+## Reviews and risks
+
+- Safety review:
+- Acceptance review:
+- Unresolved risks:
+- Platform checks left to GitHub:
+
+## Final evidence
+
+- `git diff --check`:
+- Final diff inspected:
+- Setup files excluded from PR branch:
+- Commit and branch:
