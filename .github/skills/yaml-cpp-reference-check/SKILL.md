@@ -72,7 +72,11 @@ exact values. If no matching reference applies, use
 unversioned library name or claim that an older implementation was the latest
 release. Before publication, check the final body with
 `check-reference-commit-message.sh`, passing each exact `NAME VERSION` pair
-from the ledger.
+from the ledger. That checker also enforces commit-message hygiene: describe a
+test as covering the bug or preventing future regressions, never as adding a
+regression, and keep every line at 72 characters or fewer. Wrap body
+paragraphs at natural phrase boundaries close to 72 characters rather than
+arbitrarily early.
 
 For yaml-cpp-only APIs that cannot be represented by any YAML input, record
 “not applicable” with the reason and retain the owning unit, safety, and

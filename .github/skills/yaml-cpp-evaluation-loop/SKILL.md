@@ -18,7 +18,7 @@ Use this loop after intake and after each material repair:
    to install it or waive container coverage. Record the decision and scope. A
    waiver is not a pass.
 3. For YAML-observable behavior changes, run
-   `/yaml-cpp-reference-check` after the targeted regression and before the
+   `/yaml-cpp-reference-check` after the targeted test and before the
    broad evaluator. Use only local adapters and a local fixture; record the
    implementation version, schema, normalization, and result. For parser- or
    event-level behavior, include the private libyaml C adapter as an
@@ -50,7 +50,8 @@ Use this loop after intake and after each material repair:
    all required checks pass, every waiver is recorded, reviewers have no
    actionable blocker, the history has no correction-only commit, and the
    ledger states remaining limitations. Use
-   `check-reference-commit-message.sh` to enforce the body requirement.
+   `check-reference-commit-message.sh` to enforce the body, wording, and
+   line-width requirements.
 
 The evaluator covers CMake C++11 debug tests, sanitizer tests when the
 compiler supports them, changed-file formatting, clang-tidy, cppcheck,

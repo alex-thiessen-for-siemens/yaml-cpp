@@ -9,8 +9,8 @@ commit. Confirm:
 * the request, root cause, invariant, and behavior change are clear;
 * production edits are narrow and preserve C++11, public API/ABI, exception,
   ownership, and platform contracts;
-* the regression lives in the owning existing suite and covers the changed
-  boundary plus nearby valid behavior;
+* the owning existing suite contains a test that prevents regressions and
+  covers the changed boundary plus nearby valid behavior;
 * YAML-observable behavior changes have local-reference evidence in the
   private ledger, including implementation version, schema, fixture,
   normalization, and result, or an explicit not-applicable limitation;
@@ -29,6 +29,10 @@ commit. Confirm:
   it distinguishes Docker toolchain coverage from host coverage and records
   the image and tool versions;
 * commit messages are imperative and describe the change, not the model;
+  They describe tests as covering a bug or preventing future regressions,
+  never as adding a regression. Every subject and body line is at most 72
+  characters, with body paragraphs wrapped at natural boundaries close to
+  72 rather than prematurely;
 * no private Copilot setup files, session ledgers, generated documentation, or
   unrelated cleanup will appear in the upstream PR. Pre-existing formatting
   or static-analysis findings outside changed hunks are preserved rather than

@@ -24,9 +24,10 @@ the same finding. Never rewrite user-authored or shared history without
 explicit approval. After a branch is published, obtain that approval before
 force-pushing a folded history.
 
-Every behavior change needs a deterministic regression in the test suite that
-owns the behavior. Test valid inputs and the relevant boundary or malformed
-input. For changes involving ownership, indexing, arithmetic, streams,
+Every behavior change needs a deterministic test that prevents regressions in
+the test suite that owns the behavior. Test valid inputs and the relevant
+boundary or malformed input. For changes involving ownership, indexing,
+arithmetic, streams,
 iterators, parser state, or emitter state, trace the full lifetime and state
 transition path before editing. Make ownership and failure behavior explicit.
 For behavior observable through YAML syntax, tags, schemas, serialization, or
@@ -76,7 +77,13 @@ the source of current standards, not this setup's older examples.
 Before presenting a contribution, run `git diff --check`, inspect the complete
 diff against its intended base, and verify that the final branch contains no
 private setup files. Use `/yaml-cpp-upstream-readiness` for the final check.
-Write imperative commit messages. Use `/unslop` only on fact-checked commit,
-pull request, or review prose. Do not use it to generate source comments,
-public documentation, tests, or claims not supported by the diff and evidence.
+Write imperative commit messages and describe tests as covering a bug or
+preventing future regressions. Never say that a commit "adds a regression":
+that wording implies that the contribution introduces a defect. Keep every
+commit-message line at 72 characters or fewer. Keep the subject concise and
+wrap body paragraphs at natural phrase boundaries as close to 72 characters
+as practical, not arbitrarily early. Use the local commit-message checker
+before publication. Use `/unslop` only on fact-checked commit, pull request,
+or review prose. Do not use it to generate source comments, public
+documentation, tests, or claims not supported by the diff and evidence.
 The author remains responsible for understanding and reviewing the contribution.

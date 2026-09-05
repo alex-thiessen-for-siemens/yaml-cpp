@@ -7,9 +7,11 @@ usage() {
 Usage: check-reference-commit-message.sh --commit REF \
   (--reference "NAME VERSION" ... | --not-applicable REASON)
 
-Check that the commit body contains a versioned Reference verification block.
+Check that the commit body contains a versioned Reference verification block
+and that the complete commit message follows the contribution prose rules.
 Each --reference value must include the exact reference name and version that
-the evidence ledger records.
+the evidence ledger records. Every message line must be at most 72 characters,
+and tests must not be described as adding a regression.
 EOF
 }
 
@@ -83,6 +85,26 @@ resolved_commit=$(git rev-parse --verify "${commit}^{commit}" 2>/dev/null) || {
   exit 2
 }
 body=$(git log -1 --format=%b "$resolved_commit")
+message=$(git log -1 --format=%B "$resolved_commit")
+
+line_number=0
+while IFS= read -r line; do
+  line_number=$((line_number + 1))
+  if ((${#line} > 72)); then
+    printf 'error: commit message line %d is %d characters; maximum is 72\n' \
+      "$line_number" "${#line}" >&2
+    exit 1
+  fi
+done <<<"$message"
+
+if grep -Eiq \
+  '(^|[^[:alnum:]])add(s|ed|ing)?[[:space:]]+(a[[:space:]]+)?regression([^[:alnum:]]|$)' \
+  <<<"$message"; then
+  printf '%s\n' \
+    'error: describe a test as covering the bug or preventing regressions,' \
+    'not as adding a regression' >&2
+  exit 1
+fi
 
 if ! grep -Fqx 'Reference verification:' <<<"$body" &&
   ! grep -Fq 'Reference verification: not applicable' <<<"$body"; then

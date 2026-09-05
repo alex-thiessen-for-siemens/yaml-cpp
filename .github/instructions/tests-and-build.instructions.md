@@ -2,7 +2,8 @@
 applyTo: "test/**/*,CMakeLists.txt,cmake/**/*,BUILD.bazel,**/BUILD.bazel,MODULE.bazel,**/*.yml,**/*.yaml"
 ---
 
-Put a regression in the narrowest existing test suite that owns the behavior.
+Put a test that prevents regressions in the narrowest existing test suite that
+owns the behavior.
 Use the test helpers and exception assertions already present. Keep tests
 deterministic, independent, and small enough to explain the boundary they
 protect. Spec tests are reserved for examples taken directly from the YAML

@@ -16,7 +16,7 @@ edit the first plausible file.
    the relevant source, headers, tests, build registration, and a bounded
    history slice. Do not load vendored GoogleTest or unrelated full logs.
 4. Compare one or two accepted upstream patches with the same kind of change.
-   Look for the invariant they protected, the smallest regression they added,
+   Look for the invariant they protected, the smallest test that guards it,
    and compatibility choices they made. Do not imitate their wording or copy
    unrelated cleanup.
 5. Classify the task as a bug fix, behavior addition, compatibility/build
@@ -25,8 +25,8 @@ edit the first plausible file.
    formatting, lint, or static-analysis findings in those files separately;
    they are not part of the contribution unless the request depends on them.
 6. Before implementation, write a short hypothesis in the ledger:
-   symptom, root cause, proposed correction, expected regression, risks, and
-   checks. For a behavior change, classify whether YAML syntax or a public
+   symptom, root cause, proposed correction, expected test behavior, risks,
+   and checks. For a behavior change, classify whether YAML syntax or a public
    conversion can express it and identify a locally installed reference
    implementation, version, schema, fixture, and canonical result. If no
    matching local implementation exists, record an explicit limitation.

@@ -22,10 +22,11 @@ Work in this order:
    and implementation hypothesis in the ledger.
 2. Inspect accepted upstream examples with comparable risk. Decide the
    smallest production and test change that can fix the root cause.
-3. Implement the change and its regression. Keep C++11, API/ABI, exception,
-   ownership, and platform behavior explicit. Do not add unrelated cleanup or
-   generated documentation. Preserve pre-existing lines outside the planned
-   hunks, including lines in files that the contribution touches.
+3. Implement the change and a test that prevents regressions. Keep C++11,
+   API/ABI, exception, ownership, and platform behavior explicit. Do not add
+   unrelated cleanup or generated documentation. Preserve pre-existing lines
+   outside the planned hunks, including lines in files that the contribution
+   touches.
 4. If the behavior is observable through YAML syntax, tags, schemas,
    serialization, or public conversion, invoke `/yaml-cpp-reference-check`
    with a private fixture and local adapters before the broad evaluator.
@@ -68,10 +69,14 @@ Work in this order:
    in the body. Run
    `.github/skills/yaml-cpp-reference-check/check-reference-commit-message.sh`
    against the final feature commit before publication.
-8. Only after the technical evidence is complete, use `/unslop` on the
-   imperative commit message and any PR prose. Fact-check every sentence
-   against the final diff and ledger. Do not use it for source, tests, or
-   public documentation.
+8. Write factual, imperative commit prose. Describe a test as covering the
+   bug or preventing future regressions; never write that the commit "adds a
+   regression". Keep every subject and body line at 72 characters or fewer,
+   wrapping body paragraphs at natural boundaries close to 72 rather than
+   prematurely. Only after the technical evidence is complete, use `/unslop`
+   on the commit message and any PR prose. Fact-check every sentence against
+   the final diff and ledger. Do not use it for source, tests, or public
+   documentation.
 9. Finish with `git diff --check`, a complete diff inspection, the exact
    commands and results in the ledger, and a concise handoff stating remaining
    platform-only checks. Do not claim success for a check that was unavailable

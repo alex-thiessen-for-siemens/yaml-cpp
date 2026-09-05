@@ -17,7 +17,7 @@ This file belongs in private Copilot session artifacts, not in the repository.
 - Owning test suite:
 - Invariant:
 - Hypothesis:
-- Expected regression:
+- Expected test behavior:
 
 ## Local reference comparison
 

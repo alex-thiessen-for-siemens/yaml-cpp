@@ -20,5 +20,5 @@ for fixing the state transition that made the guard necessary.
 
 Match existing exception types, marks, messages, and `noexcept` behavior. Do
 not catch broad exceptions or turn a failure into a success-shaped fallback.
-When a public behavior changes, add a regression at the owning test layer and
-check both the changed case and nearby valid behavior.
+When a public behavior changes, add a test that prevents regressions at the
+owning test layer. Check both the changed case and nearby valid behavior.
