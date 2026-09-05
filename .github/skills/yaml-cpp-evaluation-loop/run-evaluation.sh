@@ -115,19 +115,37 @@ tool_available() {
 }
 
 tool_command() {
-  if command -v bazel >/dev/null 2>&1; then
+  if bazel_command_supported bazel; then
+    printf '%s\n' bazel
+  elif bazel_command_supported bazelisk; then
+    printf '%s\n' bazelisk
+  elif command -v bazel >/dev/null 2>&1; then
     printf '%s\n' bazel
   else
     printf '%s\n' bazelisk
   fi
 }
 
-bazel_supported() {
-  local command major
-  command=$(tool_command)
-  major=$("$command" --version 2>/dev/null |
-    sed -n 's/.* \([0-9][0-9]*\)\..*/\1/p' | head -1)
+bazel_version_major() {
+  local command=$1
+  "$command" --version 2>/dev/null |
+    sed -n 's/.* \([0-9][0-9]*\)\..*/\1/p' | head -1
+}
+
+bazel_command_supported() {
+  local command=$1
+  local major
+  if ! command -v "$command" >/dev/null 2>&1; then
+    return 1
+  fi
+  major=$(bazel_version_major "$command")
   [[ "$major" =~ ^[0-9]+$ ]] && ((major >= 7))
+}
+
+bazel_supported() {
+  local command
+  command=$(tool_command)
+  bazel_command_supported "$command"
 }
 
 tool_state() {

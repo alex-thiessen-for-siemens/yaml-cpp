@@ -43,7 +43,30 @@ if git show-ref --verify --quiet "refs/heads/$new_branch"; then
 fi
 
 patch_file=$(mktemp)
-trap 'rm -f "$patch_file"' EXIT
+branch_created=false
+cleanup_export() {
+  local status=$?
+  trap - EXIT
+  if ((status != 0)) && [[ "$branch_created" == true ]]; then
+    if [[ "$(git branch --show-current)" != "$current_branch" ]]; then
+      if ! git reset --quiet; then
+        printf '%s\n' "warning: failed to reset the incomplete export" >&2
+      fi
+      if ! git switch "$current_branch"; then
+        printf '%s\n' \
+          "error: failed to restore the original branch: $current_branch" >&2
+        exit "$status"
+      fi
+    fi
+    if ! git branch -D "$new_branch"; then
+      printf 'error: failed to remove incomplete branch: %s\n' "$new_branch" >&2
+      exit "$status"
+    fi
+  fi
+  rm -f "$patch_file"
+  exit "$status"
+}
+trap cleanup_export EXIT
 git diff --binary "$base_ref...HEAD" -- . \
   ':(exclude).github/copilot-instructions.md' \
   ':(exclude).github/instructions/**' \
@@ -55,15 +78,15 @@ if [[ ! -s "$patch_file" ]]; then
   exit 2
 fi
 
+branch_created=true
 git switch -c "$new_branch" "$base_ref"
+git apply --check --index "$patch_file"
 git apply --index "$patch_file"
 
 if git diff --cached --name-only |
     grep -E '^\.github/(copilot-instructions\.md|instructions/|agents/|skills/)' \
     >/dev/null; then
   printf '%s\n' "error: setup files leaked into the exported branch" >&2
-  git reset
-  git switch "$current_branch"
   exit 1
 fi
 

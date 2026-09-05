@@ -14,6 +14,13 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
   printf '%s\n' "error: subtree updates require a clean worktree" >&2
   exit 2
 fi
+untracked_files=$(git ls-files --others --exclude-standard)
+if [[ -n "$untracked_files" ]]; then
+  printf '%s\n' \
+    "error: subtree updates require no untracked files" >&2
+  printf '%s\n' "$untracked_files" >&2
+  exit 2
+fi
 
 git clone --depth=1 --filter=blob:none --no-checkout "$source_repo" \
   "$tmp_dir/plugins"
