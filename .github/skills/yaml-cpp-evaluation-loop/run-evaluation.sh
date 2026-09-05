@@ -322,7 +322,8 @@ check_changed_formatting() {
 }
 
 check_changed_cppcheck() {
-  local output status line diagnostic_file diagnostic_line relevant=0
+  local output status line diagnostic_file diagnostic_line
+  local diagnostics=0 relevant=0
   output=$(mktemp)
   if cppcheck --enable=warning,style,performance,portability \
       --check-level=exhaustive --error-exitcode=1 --std=c++11 -I include \
@@ -342,6 +343,7 @@ check_changed_cppcheck() {
 
   while IFS= read -r line; do
     if [[ "$line" =~ ^([^:]+):([0-9]+):([0-9]+): ]]; then
+      diagnostics=1
       diagnostic_file=${BASH_REMATCH[1]}
       diagnostic_line=${BASH_REMATCH[2]}
       if [[ "$diagnostic_file" == "$repo_root/"* ]]; then
@@ -356,8 +358,13 @@ check_changed_cppcheck() {
       fi
     fi
   done <"$output"
-  rm -f "$output"
 
+  if ((diagnostics == 0)); then
+    cat "$output"
+    rm -f "$output"
+    return 1
+  fi
+  rm -f "$output"
   if ((relevant > 0)); then
     return 1
   fi
