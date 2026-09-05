@@ -15,7 +15,9 @@ commit. Confirm:
   and CI implications were considered when relevant;
 * `git diff --check` passes, changed C++ files match `.clang-format`, and the
   evaluation ledger contains exact commands, results, user waivers, and
-  remaining platform limitations;
+  remaining platform limitations. If host tools were missing or incompatible,
+  it distinguishes Docker toolchain coverage from host coverage and records
+  the image and tool versions;
 * commit messages are imperative and describe the change, not the model;
 * no private Copilot setup files, session ledgers, generated documentation, or
   unrelated cleanup will appear in the upstream PR.
@@ -31,6 +33,12 @@ If the current work began on the private `llm-contribute` setup branch, use
 base. That script carries only the contribution diff and leaves setup files
 out of the final tree. Inspect the staged file list before committing. The
 final comparison with the upstream base must contain only contribution files.
+
+If the current CI, contribution rules, accepted patch patterns, or maintainer
+culture have changed since calibration, run
+`/yaml-cpp-standards-refresh` before declaring the contribution ready. Docker
+and QEMU can provide Linux toolchain evidence only; they do not replace the
+upstream Windows, macOS, or native ARM matrix.
 
 Return only actionable blockers and a short evidence summary. Do not edit
 files during this review unless the user explicitly asks for repairs.

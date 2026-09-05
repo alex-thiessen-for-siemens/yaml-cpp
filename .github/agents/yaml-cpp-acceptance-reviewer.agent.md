@@ -18,9 +18,17 @@ Check that the change:
   contracts;
 * updates CMake, Bazel, installation, or CI only when the change requires it;
 * passes `git diff --check`, formatting, and the recorded evaluation gates;
+  if the host lacks a compatible gate, confirm that the pinned Docker
+  evaluator was used or that the user recorded an explicit waiver;
 * contains no unrelated cleanup, generated documentation, session ledger, or
   private Copilot setup file in the final upstream comparison;
 * uses an imperative commit message with factual claims only.
+
+If the repository's current CI, contribution rules, or accepted patch patterns
+have changed since the setup was calibrated, report that standards-refresh
+blocker instead of applying stale expectations. Do not treat Docker Linux or
+QEMU emulation as proof of the repository's native Windows, macOS, or ARM CI
+matrix.
 
 Return a short list of actionable blockers with file/line and confidence, or
 state that no blocker was found. Treat unavailable and waived checks as

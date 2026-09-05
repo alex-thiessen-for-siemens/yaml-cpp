@@ -24,9 +24,11 @@ Work in this order:
    ownership, and platform behavior explicit. Do not add unrelated cleanup or
    generated documentation.
 4. Use `/yaml-cpp-evaluation-loop`. Inventory tools before running the
-   maximum local checks. If a useful tool is missing, ask the user whether to
-   install it or waive the check. Do not install without approval. Record the
-   version, decision, result, and coverage. A waiver is not a pass.
+   maximum local checks. If a useful host tool is missing or too old, prefer
+   the Docker evaluator before requesting a privileged host install. If Docker
+   is unavailable, ask the user whether to install it or waive container
+   coverage. Do not install host software without approval. Record the image
+   or tool version, decision, result, and coverage. A waiver is not a pass.
 5. After deterministic checks pass, invoke
    `yaml-cpp-safety-reviewer` and `yaml-cpp-acceptance-reviewer` as bounded,
    read-only reviews when those agents are available. If either reports a
@@ -51,3 +53,7 @@ Compact only at phase boundaries after updating the ledger. After compaction,
 re-read the ledger, `git status`, and the actual diff before continuing. If
 the request is destructive, lacks a safe interpretation, or needs a user
 decision about scope, stop and ask instead of guessing.
+
+If the repository's CI, contribution rules, or recent maintainer-approved
+patches no longer match the setup, use `/yaml-cpp-standards-refresh` before
+starting another contribution.

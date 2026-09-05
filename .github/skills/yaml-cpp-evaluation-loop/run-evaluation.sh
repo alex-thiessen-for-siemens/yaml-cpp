@@ -13,13 +13,14 @@ Usage: run-evaluation.sh [options]
 Options:
   --inventory              Print tool availability and versions, then exit.
   --base REF               Compare changed files with REF (default: upstream/master).
-  --build-root DIR         Build directory root (default: build-copilot-eval).
+  --build-root DIR         Build directory root (default: build/copilot-eval).
   --ledger FILE            Append results to a private evidence ledger.
   --waive TOOL             Explicitly waive TOOL (repeatable).
   --help                   Show this help.
 
 Useful waiver names are: clang-format, clang-tidy, cppcheck, valgrind, bazel,
-bzlmod, sanitizer, cmake, ctest, and compiler. The caller must obtain the
+bzlmod, sanitizer, cmake, ctest, and compiler. This repository needs Bazel 7
+or newer for its MODULE.bazel-only workspace. The caller must obtain the
 user's decision before passing --waive.
 EOF
 }
@@ -32,7 +33,7 @@ cd "$repo_root" || exit 2
 
 inventory_only=false
 base_ref=${BASE_REF:-upstream/master}
-build_root=${BUILD_ROOT:-"$repo_root/build-copilot-eval"}
+build_root=${BUILD_ROOT:-"$repo_root/build/copilot-eval"}
 ledger=${EVIDENCE_LEDGER:-}
 declare -a waivers=()
 
@@ -98,8 +99,8 @@ version_for() {
 
 tool_available() {
   case "$1" in
-    bzlmod)
-      command -v bazel >/dev/null 2>&1 || command -v bazelisk >/dev/null 2>&1
+    bazel|bzlmod)
+      bazel_supported
       ;;
     sanitizer)
       command -v "${CXX:-c++}" >/dev/null 2>&1
@@ -121,8 +122,28 @@ tool_command() {
   fi
 }
 
+bazel_supported() {
+  local command major
+  command=$(tool_command)
+  major=$("$command" --version 2>/dev/null |
+    sed -n 's/.* \([0-9][0-9]*\)\..*/\1/p' | head -1)
+  [[ "$major" =~ ^[0-9]+$ ]] && ((major >= 7))
+}
+
 tool_state() {
   local tool=$1
+  if [[ "$tool" == bazel || "$tool" == bzlmod ]]; then
+    if ! command -v bazel >/dev/null 2>&1 &&
+      ! command -v bazelisk >/dev/null 2>&1; then
+      printf 'missing\t%s\t-\n' "$tool"
+    elif bazel_supported; then
+      printf 'available\t%s\t%s\n' "$tool" "$(version_for "$tool")"
+    else
+      printf 'incompatible\t%s\t%s (Bazel 7+ required)\n' "$tool" \
+        "$(version_for "$tool")"
+    fi
+    return
+  fi
   if tool_available "$tool"; then
     printf 'available\t%s\t%s\n' "$tool" "$(version_for "$tool")"
   else
@@ -143,6 +164,7 @@ fi
 
 missing=0
 failures=0
+waived=0
 record() {
   local line=$1
   printf '%s\n' "$line"
@@ -158,7 +180,8 @@ require_tool() {
   fi
   if has_waiver "$tool"; then
     record "WAIVED $tool: user waiver supplied"
-    return 0
+    waived=$((waived + 1))
+    return 10
   fi
   record "MISSING $tool: ask the user to install it or waive this check"
   missing=$((missing + 1))
@@ -182,9 +205,16 @@ if [[ -n "$ledger" ]]; then
   record "## evaluator $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 fi
 
-require_tool cmake
-require_tool ctest
-require_tool compiler
+for required_tool in cmake ctest compiler; do
+  if ! tool_available "$required_tool"; then
+    if has_waiver "$required_tool"; then
+      record "INVALID WAIVER $required_tool: this required tool must be installed"
+    else
+      record "MISSING $required_tool: ask the user to install it before evaluation"
+    fi
+    missing=$((missing + 1))
+  fi
+done
 
 if ((missing > 0)); then
   record "STOP missing required tools: obtain user install/waive decisions before evaluation"
@@ -193,14 +223,19 @@ fi
 
 changed_files=()
 if git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
-  while IFS= read -r file; do
-    [[ -n "$file" ]] && changed_files+=("$file")
-  done < <(git diff --name-only "$base_ref...HEAD")
+  diff_base="$base_ref"
 else
   record "NOTE base ref '$base_ref' is unavailable; using HEAD^ for changed-file checks"
-  while IFS= read -r file; do
-    [[ -n "$file" ]] && changed_files+=("$file")
-  done < <(git diff --name-only HEAD^)
+  diff_base=HEAD^
+fi
+while IFS= read -r file; do
+  [[ -n "$file" ]] && changed_files+=("$file")
+done < <(git diff --name-only "$diff_base")
+while IFS= read -r file; do
+  [[ -n "$file" ]] && changed_files+=("$file")
+done < <(git ls-files --others --exclude-standard)
+if ((${#changed_files[@]} > 0)); then
+  mapfile -t changed_files < <(printf '%s\n' "${changed_files[@]}" | sort -u)
 fi
 
 cpp_files=()
@@ -258,7 +293,7 @@ sanitizer_build="$build_root/cmake-sanitizers"
 if require_tool sanitizer; then
   compiler=${CXX:-c++}
   sanitizer_probe=$(mktemp -d)
-  trap 'rm -rf "$sanitizer_probe"' EXIT
+  trap 'rm -f "$sanitizer_probe/probe"; rmdir "$sanitizer_probe"' EXIT
   if printf '%s\n' 'int main() { return 0; }' |
       "$compiler" -x c++ -std=c++11 -fsanitize=address,undefined \
         -fno-omit-frame-pointer -o "$sanitizer_probe/probe" -; then
@@ -270,32 +305,48 @@ if require_tool sanitizer; then
       -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -g" \
       -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
     run_step "cmake build sanitizers" cmake --build "$sanitizer_build" --parallel
-    run_step "ctest sanitizers" ctest --test-dir "$sanitizer_build" --output-on-failure
+    asan_runtime=$("$compiler" -print-file-name=libasan.so 2>/dev/null || true)
+    if [[ -f "$asan_runtime" ]]; then
+      run_step "ctest sanitizers" env LD_PRELOAD="$asan_runtime" ctest \
+        --test-dir "$sanitizer_build" --output-on-failure
+    else
+      run_step "ctest sanitizers" ctest --test-dir "$sanitizer_build" \
+        --output-on-failure
+    fi
   else
     record "UNAVAILABLE sanitizer: compiler rejected address/undefined sanitizer flags"
-    if ! has_waiver sanitizer; then
+    if has_waiver sanitizer; then
+      record "WAIVED sanitizer: user waiver supplied after compiler rejection"
+      waived=$((waived + 1))
+    else
       missing=$((missing + 1))
     fi
   fi
 fi
 
 if require_tool valgrind; then
+  test_binary="$debug_build/test/yaml-cpp-tests"
   run_step "valgrind yaml-cpp tests" valgrind --leak-check=full \
-    --error-exitcode=1 "$debug_build/yaml-cpp-tests"
+    --error-exitcode=1 "$test_binary"
 fi
 
 if require_tool bazel; then
   bazel_command=$(tool_command)
-  run_step "bazel test" "$bazel_command" test test
+  run_step "bazel test" "$bazel_command" test --lockfile_mode=off test
 fi
 
 if require_tool bzlmod; then
   bazel_command=$(tool_command)
-  run_step "bazel bzlmod test" "$bazel_command" test --enable_bzlmod test
+  run_step "bazel bzlmod test" "$bazel_command" test --enable_bzlmod \
+    --lockfile_mode=off test
 fi
 
 if ((missing > 0 || failures > 0)); then
-  record "RESULT incomplete: missing/waived tool decisions=$missing failures=$failures"
+  record "RESULT incomplete: waived=$waived missing=$missing failures=$failures"
   exit 1
 fi
-record "RESULT pass: all selected local checks completed"
+if ((waived > 0)); then
+  record "RESULT incomplete: waived=$waived missing=0 failures=0"
+  exit 4
+fi
+record "RESULT pass: all non-waived local checks completed; waived=$waived"

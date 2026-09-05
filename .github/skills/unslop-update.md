@@ -22,3 +22,7 @@ subtree split for the source path, and runs `git subtree pull --squash` into
 `.github/skills/unslop`. Review the resulting subtree commit and record the
 source commit in this file before committing the update. Do not hand-edit
 files inside the subtree.
+
+Review this setup with `/yaml-cpp-standards-refresh` when the repository's
+contribution rules or maintainer writing culture changes. Keep the subtree
+update separate from yaml-cpp code contributions.

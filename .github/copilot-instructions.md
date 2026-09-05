@@ -19,10 +19,11 @@ transition path before editing. Make ownership and failure behavior explicit.
 
 Use the repository's `.clang-format` and surrounding code style. Run the
 targeted CMake test first, then the maximum practical evaluation described by
-`/yaml-cpp-evaluation-loop`. If a useful quality tool is unavailable, stop and
-ask the user whether to install it or waive that check. Record the tool,
-version, decision, and coverage in the session evidence ledger. Never silently
-skip a check or call a waived check passed.
+`/yaml-cpp-evaluation-loop`. If a host tool is missing or too old, use the
+Docker evaluator when its daemon is available. If Docker is unavailable, stop
+and ask the user whether to install it or waive container coverage. Record the
+tool or image version, decision, and coverage in the session evidence ledger.
+Never silently skip a check or call a waived check passed.
 
 Keep the context small. Read only relevant source, tests, and history. Do not
 load vendored GoogleTest or paste full build logs into the conversation. Keep a
@@ -37,6 +38,11 @@ diff and deterministic checks. Repair concrete findings, then rerun the
 affected checks. Stop when the diff is focused, the evidence is complete, and
 no actionable blocker remains. Do not repeatedly ask a model to rewrite a
 passing change.
+
+When upstream's build matrix, contribution rules, accepted patch patterns, or
+review culture changes, use `/yaml-cpp-standards-refresh` before relying on
+this setup. Treat the repository and recent maintainer-approved changes as
+the source of current standards, not this setup's older examples.
 
 Before presenting a contribution, run `git diff --check`, inspect the complete
 diff against its intended base, and verify that the final branch contains no

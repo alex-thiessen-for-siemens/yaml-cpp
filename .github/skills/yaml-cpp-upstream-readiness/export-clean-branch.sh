@@ -30,6 +30,13 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
   printf '%s\n' "error: commit implementation changes before exporting a clean branch" >&2
   exit 2
 fi
+untracked_files=$(git ls-files --others --exclude-standard)
+if [[ -n "$untracked_files" ]]; then
+  printf '%s\n' \
+    "error: export requires no untracked files; private setup could leak" >&2
+  printf '%s\n' "$untracked_files" >&2
+  exit 2
+fi
 if git show-ref --verify --quiet "refs/heads/$new_branch"; then
   printf 'error: branch already exists: %s\n' "$new_branch" >&2
   exit 2
