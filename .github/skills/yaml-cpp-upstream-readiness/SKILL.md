@@ -17,6 +17,10 @@ commit. Confirm:
 * parser- or event-level behavior also records separate local libyaml C
   evidence when available, without treating libyaml as a native-value
   constructor;
+* the final feature commit body contains a `Reference verification:` block
+  naming every reference library, exact version, schema or parser layer, and
+  result when comparison passed, or an explicit not-applicable reason;
+  run `check-reference-commit-message.sh` against that commit before export;
 * CMake source lists, Bazel targets or globs, installation, package checks,
   and CI implications were considered when relevant;
 * `git diff --check` passes, changed C++ files match `.clang-format`, and the

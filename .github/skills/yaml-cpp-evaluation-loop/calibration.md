@@ -23,4 +23,6 @@ matching local-reference comparison with recorded schema and normalization;
 an unavailable matching implementation is an explicit limitation. Parser- or
 event-level behavior should add separate libyaml C evidence when available,
 while constructed-value behavior still requires a matching semantic
-implementation.
+implementation. When a reference comparison passes, the commit body must name
+each reference's exact version, schema or layer, and result; the latest stable
+matching release is the default.

@@ -35,6 +35,8 @@ Work in this order:
    behavior is parser- or event-observable, also use the private libyaml C
    adapter as a parser-only oracle; keep it separate from native-value
    evidence because libyaml does not construct resolved values.
+   Prefer the latest stable matching releases available locally, recording
+   the latest known release and any freshness waiver.
 5. Use `/yaml-cpp-evaluation-loop`. Inventory tools before running the
    maximum local checks. If a useful host tool is missing or too old, prefer
    the Docker evaluator before requesting a privileged host install. If Docker
@@ -60,6 +62,12 @@ Work in this order:
    the complete commit history for correction-only commits. A published
    branch may be force-pushed only after the user explicitly approves the
    history rewrite.
+   If a reference comparison passed, put a `Reference verification:` block in
+   the feature commit body with every reference name, exact version, schema or
+   layer, and result. If none applies, put the explicit not-applicable reason
+   in the body. Run
+   `.github/skills/yaml-cpp-reference-check/check-reference-commit-message.sh`
+   against the final feature commit before publication.
 8. Only after the technical evidence is complete, use `/unslop` on the
    imperative commit message and any PR prose. Fact-check every sentence
    against the final diff and ledger. Do not use it for source, tests, or

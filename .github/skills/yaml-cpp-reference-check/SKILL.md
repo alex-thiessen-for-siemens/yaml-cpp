@@ -15,6 +15,13 @@ PyYAML or Ruby Psych when their version and schema are suitable. Do not fetch a
 package, call a hosted service, or add an adapter to the contribution branch.
 Keep the fixture and adapters in private session artifacts or `/tmp`.
 
+Prefer the latest stable release of each matching implementation that is
+available locally and supports the required schema. Establish the latest
+release known at verification time before running the local-only comparison,
+using local package metadata or a standards refresh rather than a network call
+from the runner. If the latest matching release is unavailable, ask whether
+to install it or waive freshness, then record the decision and both versions.
+
 LibYAML is the YAML community's established C parser and emitter
 implementation, often used as a parser/emitter reference. Its documented
 scope stops at parsing and presenting: it does not resolve tags or construct
@@ -49,6 +56,23 @@ is a failure requiring diagnosis, not permission to weaken the test. If no
 local implementation has matching semantics, record the reason and an
 explicit reference-check limitation; do not claim that the behavior is
 cross-validated.
+
+When a behavior change passes a reference comparison, include this fact in the
+final commit message body:
+
+```
+Reference verification:
+- PyYAML 6.0.3 (YAML 1.1 !!binary, native value): matched 4d.
+- libyaml 0.2.5 (parser/event layer): matched the yaml-cpp event stream.
+```
+
+Replace the example versions, schema or layer, and result with the ledger's
+exact values. If no matching reference applies, use
+`Reference verification: not applicable — REASON` instead. Do not write an
+unversioned library name or claim that an older implementation was the latest
+release. Before publication, check the final body with
+`check-reference-commit-message.sh`, passing each exact `NAME VERSION` pair
+from the ledger.
 
 For yaml-cpp-only APIs that cannot be represented by any YAML input, record
 “not applicable” with the reason and retain the owning unit, safety, and

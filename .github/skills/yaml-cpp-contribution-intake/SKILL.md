@@ -30,6 +30,10 @@ edit the first plausible file.
    conversion can express it and identify a locally installed reference
    implementation, version, schema, fixture, and canonical result. If no
    matching local implementation exists, record an explicit limitation.
+   Prefer the latest stable matching release available locally; record the
+   latest release known at intake and any freshness waiver. Plan a
+   `Reference verification:` block with exact reference versions for the
+   eventual commit body when the comparison is applicable.
    If the request is genuinely ambiguous or would cause destructive changes,
    ask the user. Otherwise choose the least surprising behavior and proceed.
 

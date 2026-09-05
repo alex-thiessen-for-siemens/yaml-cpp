@@ -43,9 +43,14 @@ Use this loop after intake and after each material repair:
    Repair only concrete blockers and rerun the affected checks.
 7. Before upstream readiness, inspect the complete feature history. Fold
    review repairs caused by the feature into the relevant commit or series,
-   then rerun affected checks. Stop only when all required checks pass, every
-   waiver is recorded, reviewers have no actionable blocker, the history has
-   no correction-only commit, and the ledger states remaining limitations.
+   then rerun affected checks. If a reference comparison passed, require a
+   `Reference verification:` block in the feature commit body with every
+   reference's exact version, schema or layer, and result. If no reference
+   applies, require the explicit not-applicable reason instead. Stop only when
+   all required checks pass, every waiver is recorded, reviewers have no
+   actionable blocker, the history has no correction-only commit, and the
+   ledger states remaining limitations. Use
+   `check-reference-commit-message.sh` to enforce the body requirement.
 
 The evaluator covers CMake C++11 debug tests, sanitizer tests when the
 compiler supports them, changed-file formatting, clang-tidy, cppcheck,

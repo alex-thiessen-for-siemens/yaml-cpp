@@ -38,6 +38,13 @@ not-applicable limitation when no matching local implementation exists. Use
 libyaml's local C event adapter as an additional parser/tag/scalar oracle when
 the change is observable at that layer; it does not validate native-value
 construction and must not replace a matching semantic implementation.
+Prefer the latest stable release of each matching reference library that is
+available locally and supports the required schema. Record the latest release
+known at verification time and any older-version waiver. If a behavior change
+passes a reference comparison, its final commit message body must contain a
+`Reference verification:` block naming every reference library, exact version,
+schema or parser layer, and result. If no matching reference applies, include
+`Reference verification: not applicable` with the reason instead.
 
 Use the repository's `.clang-format` and surrounding code style. Run the
 targeted CMake test first, then the maximum practical evaluation described by

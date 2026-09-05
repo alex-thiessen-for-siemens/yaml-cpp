@@ -23,6 +23,8 @@ This file belongs in private Copilot session artifacts, not in the repository.
 
 - Applicable:
 - Implementation and version:
+- Latest stable release known at verification time:
+- Freshness waiver or selection reason:
 - YAML version/schema/tags:
 - Fixture (private path):
 - Adapter paths:
@@ -30,6 +32,8 @@ This file belongs in private Copilot session artifacts, not in the repository.
 - Command and result:
 - Additional libyaml C parser oracle and version/scope:
 - Limitation or mismatch:
+- Commit-body `Reference verification:` block:
+- Commit-message check command and result:
 
 ## Changed files
 

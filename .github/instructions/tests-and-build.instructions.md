@@ -14,6 +14,10 @@ result in the private ledger. Do not add the fixture or adapter to the
 upstream contribution, and do not use a network service as an oracle.
 For parser- or event-level behavior, also build the private libyaml adapter
 and record its parser-only scope separately from any native-value comparison.
+Prefer the latest stable matching reference release available locally. When
+the comparison passes, put a `Reference verification:` block in the commit
+message body with every reference name, exact version, schema or layer, and
+result. If freshness is waived, record that waiver in the ledger and body.
 
 Preserve existing test statements, indentation, and comments outside the
 requested hunk. Do not normalize a whole touched test file to satisfy a

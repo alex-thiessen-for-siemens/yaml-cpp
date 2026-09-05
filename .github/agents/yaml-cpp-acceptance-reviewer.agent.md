@@ -20,6 +20,11 @@ Check that the change:
 * for parser- or event-level behavior, includes separate libyaml C evidence
   when available and does not mistake its parser-only result for native-value
   construction evidence;
+* when reference verification passed, the feature commit body contains a
+  `Reference verification:` block with exact versions, schema or layer, and
+  result for every reference; otherwise it contains the explicit limitation;
+  confirm it with `check-reference-commit-message.sh` rather than trusting
+  an unversioned prose claim;
 * preserves C++11, public API/ABI, exception, ownership, package, and platform
   contracts;
 * updates CMake, Bazel, installation, or CI only when the change requires it;
