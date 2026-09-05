@@ -20,7 +20,9 @@ commit. Confirm:
   the image and tool versions;
 * commit messages are imperative and describe the change, not the model;
 * no private Copilot setup files, session ledgers, generated documentation, or
-  unrelated cleanup will appear in the upstream PR.
+  unrelated cleanup will appear in the upstream PR. Pre-existing formatting
+  or static-analysis findings outside changed hunks are preserved rather than
+  “fixed” opportunistically.
 
 Run `/unslop` only after the technical review. Apply it to the commit message,
 PR title/body, or a concise review reply. Preserve every fact, number,

@@ -22,13 +22,16 @@ Work in this order:
    smallest production and test change that can fix the root cause.
 3. Implement the change and its regression. Keep C++11, API/ABI, exception,
    ownership, and platform behavior explicit. Do not add unrelated cleanup or
-   generated documentation.
+   generated documentation. Preserve pre-existing lines outside the planned
+   hunks, including lines in files that the contribution touches.
 4. Use `/yaml-cpp-evaluation-loop`. Inventory tools before running the
    maximum local checks. If a useful host tool is missing or too old, prefer
    the Docker evaluator before requesting a privileged host install. If Docker
    is unavailable, ask the user whether to install it or waive container
    coverage. Do not install host software without approval. Record the image
    or tool version, decision, result, and coverage. A waiver is not a pass.
+   If a formatter or static analyzer reports an unchanged line, classify it as
+   baseline debt and do not edit that line to satisfy the gate.
 5. After deterministic checks pass, invoke
    `yaml-cpp-safety-reviewer` and `yaml-cpp-acceptance-reviewer` as bounded,
    read-only reviews when those agents are available. If either reports a
@@ -47,7 +50,8 @@ Work in this order:
 8. Finish with `git diff --check`, a complete diff inspection, the exact
    commands and results in the ledger, and a concise handoff stating remaining
    platform-only checks. Do not claim success for a check that was unavailable
-   or waived.
+   or waived. Confirm that every changed line belongs to the requested
+   behavior; a touched file is not blanket permission for cleanup.
 
 Compact only at phase boundaries after updating the ledger. After compaction,
 re-read the ledger, `git status`, and the actual diff before continuing. If

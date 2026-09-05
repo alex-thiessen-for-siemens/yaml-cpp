@@ -21,7 +21,9 @@ edit the first plausible file.
    unrelated cleanup.
 5. Classify the task as a bug fix, behavior addition, compatibility/build
    change, or maintenance-only change. State the affected invariant and the
-   smallest file set you expect to change.
+   smallest file and hunk set you expect to change. Record any pre-existing
+   formatting, lint, or static-analysis findings in those files separately;
+   they are not part of the contribution unless the request depends on them.
 6. Before implementation, write a short hypothesis in the ledger:
    symptom, root cause, proposed correction, expected regression, risks, and
    checks. If the request is genuinely ambiguous or would cause destructive

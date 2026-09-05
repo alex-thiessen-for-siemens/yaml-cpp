@@ -271,6 +271,100 @@ for file in "${changed_files[@]}"; do
   esac
 done
 
+changed_line_ranges() {
+  local file=$1
+  local start count end
+
+  if ! git ls-files --error-unmatch -- "$file" >/dev/null 2>&1; then
+    printf '1:2147483647\n'
+    return
+  fi
+
+  while read -r start count; do
+    [[ -n "$start" ]] || continue
+    [[ -n "$count" ]] || count=1
+    ((count > 0)) || continue
+    end=$((start + count - 1))
+    printf '%s:%s\n' "$start" "$end"
+  done < <(
+    git diff --unified=0 "$diff_base" -- "$file" |
+      sed -nE \
+        's/^@@ -[0-9]+(,[0-9]+)? \+([0-9]+)(,([0-9]+))? @@.*/\2 \4/p'
+  )
+}
+
+line_is_changed() {
+  local file=$1
+  local line=$2
+  local start end
+
+  [[ "$line" =~ ^[1-9][0-9]*$ ]] || return 1
+  while IFS=: read -r start end; do
+    if ((line >= start && line <= end)); then
+      return 0
+    fi
+  done < <(changed_line_ranges "$file")
+  return 1
+}
+
+check_changed_formatting() {
+  local file range
+  local -a ranges
+
+  for file in "${cpp_files[@]}"; do
+    mapfile -t ranges < <(changed_line_ranges "$file")
+    for range in "${ranges[@]}"; do
+      printf 'CHECK clang-format %s lines %s\n' "$file" "$range"
+      clang-format --dry-run --Werror --style=file "-lines=$range" "$file" ||
+        return
+    done
+  done
+}
+
+check_changed_cppcheck() {
+  local output status line diagnostic_file diagnostic_line relevant=0
+  output=$(mktemp)
+  if cppcheck --enable=warning,style,performance,portability \
+      --check-level=exhaustive --error-exitcode=1 --std=c++11 -I include \
+      -I src "${cpp_files[@]}" >"$output" 2>&1; then
+    cat "$output"
+    rm -f "$output"
+    return 0
+  else
+    status=$?
+  fi
+
+  if ((status != 1)); then
+    cat "$output"
+    rm -f "$output"
+    return "$status"
+  fi
+
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^([^:]+):([0-9]+):([0-9]+): ]]; then
+      diagnostic_file=${BASH_REMATCH[1]}
+      diagnostic_line=${BASH_REMATCH[2]}
+      if [[ "$diagnostic_file" == "$repo_root/"* ]]; then
+        diagnostic_file=${diagnostic_file#"$repo_root"/}
+      fi
+      diagnostic_file=${diagnostic_file#./}
+      if line_is_changed "$diagnostic_file" "$diagnostic_line"; then
+        printf '%s\n' "$line"
+        relevant=1
+      else
+        printf 'BASELINE %s\n' "$line"
+      fi
+    fi
+  done <"$output"
+  rm -f "$output"
+
+  if ((relevant > 0)); then
+    return 1
+  fi
+  printf '%s\n' \
+    "cppcheck diagnostics are limited to unchanged lines; preserving baseline"
+}
+
 mkdir -p "$build_root"
 debug_build="$build_root/cmake-cxx11-debug"
 run_step "cmake configure C++11 debug" cmake -S "$repo_root" -B "$debug_build" \
@@ -286,8 +380,7 @@ if ((${#cpp_files[@]} == 0)); then
   record "SKIP formatting: no changed C++ files"
 else
   if require_tool clang-format; then
-    run_step "clang-format changed C++ files" clang-format --dry-run --Werror \
-      --style=file "${cpp_files[@]}"
+    run_step "clang-format changed C++ hunks" check_changed_formatting
   fi
 fi
 
@@ -303,9 +396,7 @@ fi
 if ((${#cpp_files[@]} == 0)); then
   record "SKIP cppcheck: no changed C++ files"
 elif require_tool cppcheck; then
-  run_step "cppcheck changed C++ files" cppcheck --enable=warning,style,performance,portability \
-    --check-level=exhaustive --error-exitcode=1 --std=c++11 -I include \
-    -I src "${cpp_files[@]}"
+  run_step "cppcheck changed C++ files" check_changed_cppcheck
 fi
 
 sanitizer_build="$build_root/cmake-sanitizers"

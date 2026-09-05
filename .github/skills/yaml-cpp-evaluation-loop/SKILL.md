@@ -20,7 +20,10 @@ Use this loop after intake and after each material repair:
 3. Run the smallest relevant CMake test and formatting check first. Then run
    `run-evaluation.sh` on the host or the container runner with the selected
    waivers. Both evaluators use isolated build directories and never change
-   source files.
+   source files. Formatting is checked on changed line ranges, and cppcheck
+   diagnostics are compared with those ranges, so a pre-existing finding on
+   an untouched line must not force unrelated cleanup. A finding in a changed
+   range remains a failure.
 4. Diagnose the first concrete failure. Inspect its output and affected code,
    make one focused repair, and rerun the affected phase. Do not rewrite a
    passing area or restart all model reasoning for an unrelated failure.
@@ -38,6 +41,12 @@ repository's checked-in `MODULE.bazel.lock`; lockfile freshness remains a
 repository CI concern. It never claims that unavailable or waived checks
 passed. GitHub's complete multi-platform matrix remains authoritative for
 platform-only behavior.
+
+Do not repair a baseline diagnostic merely to make this evaluator green.
+When a tool reports an unchanged-line finding, preserve the line, record it
+as baseline debt in the ledger, and continue with the changed-hunk result.
+If a tool cannot provide a scoped result, stop before widening the diff and
+record the coverage limitation for review.
 
 Keep context bounded. Do not paste full logs into the conversation. At each
 phase boundary, compact only after saving the ledger. After compaction, reread

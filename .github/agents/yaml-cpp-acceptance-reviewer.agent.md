@@ -22,6 +22,8 @@ Check that the change:
   evaluator was used or that the user recorded an explicit waiver;
 * contains no unrelated cleanup, generated documentation, session ledger, or
   private Copilot setup file in the final upstream comparison;
+* preserves pre-existing findings on unchanged lines instead of widening the
+  patch to make a file-level tool pass;
 * uses an imperative commit message with factual claims only.
 
 If the repository's current CI, contribution rules, or accepted patch patterns

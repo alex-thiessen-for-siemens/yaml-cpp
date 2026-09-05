@@ -7,6 +7,11 @@ Use the test helpers and exception assertions already present. Keep tests
 deterministic, independent, and small enough to explain the boundary they
 protect. Spec tests are reserved for examples taken directly from the YAML
 specification.
+Preserve existing test statements, indentation, and comments outside the
+requested hunk. Do not normalize a whole touched test file to satisfy a
+file-level formatter or static-analysis result. Findings on unchanged lines
+are baseline findings; leave them intact and let the evaluation loop report
+them separately from diagnostics introduced by the contribution.
 
 For new source or public headers, check CMake source registration, Bazel
 globs or targets, installation and package tests, and include dependencies.

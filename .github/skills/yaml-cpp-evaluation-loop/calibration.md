@@ -14,5 +14,6 @@ is not a claim that a model has passed a benchmark.
 A Luna Medium-quality contribution must identify the affected layer and
 invariant, preserve valid boundary behavior, add the owning regression, pass
 the selected deterministic checks, and leave no unresolved high-confidence
-review blocker. A smaller patch is preferred when it provides the same
-evidence.
+review blocker. It must also preserve pre-existing lines outside the requested
+hunks; a touched file is not permission to normalize unrelated code. A
+smaller patch is preferred when it provides the same evidence.

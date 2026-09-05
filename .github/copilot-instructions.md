@@ -10,6 +10,13 @@ platform behavior covered by the project. Prefer the smallest change that
 fixes the root cause. Do not mix drive-by cleanup, formatting-only changes,
 documentation generation, or dependency updates into a code contribution.
 Never modify vendored GoogleTest unless the task explicitly requires it.
+Scope is hunk-level, not merely file-level: record the intended files and
+behavioral hunks before editing, then inspect the complete diff after every
+repair. A formatter, linter, or static analyzer finding on an unchanged line
+is baseline debt, not permission to rewrite that line. Preserve it, use a
+line-scoped or baseline-aware check, and record the limitation rather than
+expanding the contribution. Only change an unrelated line when the user
+explicitly expands scope or the line is required for the requested behavior.
 
 Every behavior change needs a deterministic regression in the test suite that
 owns the behavior. Test valid inputs and the relevant boundary or malformed
