@@ -25,6 +25,7 @@
 #include "yaml-cpp/node/detail/iterator_fwd.h"
 #include "yaml-cpp/node/ptr.h"
 #include "yaml-cpp/node/type.h"
+#include "yaml-cpp/noexcept.h"
 
 namespace YAML {
 namespace detail {
@@ -58,6 +59,7 @@ class YAML_CPP_API Node {
   explicit Node(const T& rhs);
   explicit Node(const detail::iterator_value& rhs);
   Node(const Node& rhs);
+  Node(Node&& rhs) YAML_CPP_NOEXCEPT;
   ~Node();
 
   YAML::Mark Mark() const;
@@ -154,7 +156,8 @@ class YAML_CPP_API Node {
   // String representation of invalid key, if the node is invalid.
   std::string m_invalidKey;
   mutable detail::shared_memory_holder m_pMemory;
-  mutable detail::node* m_pNode;
+  // Aliases the memory holder while pointing at one of its nodes.
+  mutable detail::shared_node m_pNode;
 };
 
 YAML_CPP_API bool operator==(const Node& lhs, const Node& rhs);

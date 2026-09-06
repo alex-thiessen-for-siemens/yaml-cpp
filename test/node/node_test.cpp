@@ -10,6 +10,8 @@
 #include "gtest/gtest.h"
 
 #include <sstream>
+#include <type_traits>
+#include <utility>
 
 namespace {
 
@@ -181,6 +183,48 @@ TEST(NodeTest, NodeAssignment) {
   EXPECT_EQ(node1[1], node2[1]);
   EXPECT_EQ(node1[2], node2[2]);
   EXPECT_EQ(node1[3], node2[3]);
+}
+
+TEST(NodeTest, NothrowMoveConstruction) {
+  static_assert(std::is_nothrow_move_constructible<Node>::value,
+                "Node move construction must not throw");
+
+  Node node;
+  node["foo"] = "bar";
+  Node alias = node;
+  Node* node_ptr = &node;
+  Node& node_ref = node;
+  std::ostringstream expected;
+  expected << alias;
+
+  {
+    Node moved(std::move(node));
+    std::ostringstream actual;
+    actual << moved;
+
+    EXPECT_EQ(expected.str(), actual.str());
+    EXPECT_EQ("bar", moved["foo"].as<std::string>());
+    EXPECT_EQ("bar", alias["foo"].as<std::string>());
+    EXPECT_EQ(&node, node_ptr);
+    EXPECT_EQ(&node, &node_ref);
+    EXPECT_TRUE(node_ptr->IsNull());  // NOLINT(clang-analyzer-cplusplus.Move)
+    EXPECT_TRUE(node_ref.IsNull());   // NOLINT(clang-analyzer-cplusplus.Move)
+  }
+
+  node["after"] = "move";
+  EXPECT_EQ("move", node["after"].as<std::string>());
+  EXPECT_EQ("bar", alias["foo"].as<std::string>());
+}
+
+TEST(NodeTest, SharedNodeHandleSurvivesMemoryMerge) {
+  Node destination;
+  Node source;
+  source["value"] = "source";
+
+  destination["value"] = source["value"];
+
+  EXPECT_EQ("source", destination["value"].as<std::string>());
+  EXPECT_EQ("source", source["value"].as<std::string>());
 }
 
 TEST(NodeTest, EqualRepresentationAfterMoveAssignment) {

@@ -32,7 +32,7 @@ inline Node::Node(NodeType::value type)
     : m_isValid(true),
       m_invalidKey{},
       m_pMemory(std::make_shared<detail::memory_holder>()),
-      m_pNode(&m_pMemory->create_node()) {
+      m_pNode(m_pMemory, &m_pMemory->create_node()) {
   m_pNode->set_type(type);
 }
 
@@ -41,7 +41,7 @@ inline Node::Node(const T& rhs)
     : m_isValid(true),
       m_invalidKey{},
       m_pMemory(std::make_shared<detail::memory_holder>()),
-      m_pNode(&m_pMemory->create_node()) {
+      m_pNode(m_pMemory, &m_pMemory->create_node()) {
   Assign(rhs);
 }
 
@@ -53,6 +53,8 @@ inline Node::Node(const detail::iterator_value& rhs)
 
 inline Node::Node(const Node&) = default;
 
+inline Node::Node(Node&&) YAML_CPP_NOEXCEPT = default;
+
 inline Node::Node(Zombie)
     : m_isValid(false), m_invalidKey{}, m_pMemory{}, m_pNode(nullptr) {}
 
@@ -60,7 +62,10 @@ inline Node::Node(Zombie, const std::string& key)
     : m_isValid(false), m_invalidKey(key), m_pMemory{}, m_pNode(nullptr) {}
 
 inline Node::Node(detail::node& node, detail::shared_memory_holder pMemory)
-    : m_isValid(true), m_invalidKey{}, m_pMemory(pMemory), m_pNode(&node) {}
+    : m_isValid(true),
+      m_invalidKey{},
+      m_pMemory(pMemory),
+      m_pNode(m_pMemory, &node) {}
 
 inline Node::~Node() = default;
 
@@ -69,7 +74,7 @@ inline void Node::EnsureNodeExists() const {
     throw InvalidNode(m_invalidKey);
   if (!m_pNode) {
     m_pMemory.reset(new detail::memory_holder);
-    m_pNode = &m_pMemory->create_node();
+    m_pNode = detail::shared_node(m_pMemory, &m_pMemory->create_node());
     m_pNode->set_null();
   }
 }
@@ -424,7 +429,8 @@ inline bool Node::contains(const Key& key) const {
   if (!m_isValid)
     throw InvalidNode(m_invalidKey);
   if (!m_pNode) return false;
-  return (static_cast<const detail::node*>(m_pNode))->get(key, m_pMemory) != nullptr;
+  return static_cast<const detail::node&>(*m_pNode).get(key, m_pMemory) !=
+         nullptr;
 }
 
 // free functions
