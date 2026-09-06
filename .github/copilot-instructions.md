@@ -85,9 +85,13 @@ Write imperative commit messages and describe tests as covering a bug or
 preventing future regressions. Never say that a commit "adds a regression":
 that wording implies that the contribution introduces a defect. Keep every
 commit-message line at 72 characters or fewer. Keep the subject concise and
-wrap body paragraphs at natural phrase boundaries as close to 72 characters
-as practical, not arbitrarily early. Use the local commit-message checker
-before publication. Use `/unslop` only on fact-checked commit, pull request,
-or review prose. Do not use it to generate source comments, public
+follow it with exactly one blank line before the body. Wrap body paragraphs as
+contiguous lines at natural phrase boundaries as close to 72 characters as
+practical, separating paragraphs with one blank line. Do not pass each
+wrapped line as a separate `git commit -m` argument: prepare the complete
+message with `git commit -F` or one `-m` argument per paragraph. The local
+commit-message checker rejects over-segmented prose and whitespace mistakes;
+run it before publication. Use `/unslop` only on fact-checked commit, pull
+request, or review prose. Do not use it to generate source comments, public
 documentation, tests, or claims not supported by the diff and evidence.
 The author remains responsible for understanding and reviewing the contribution.

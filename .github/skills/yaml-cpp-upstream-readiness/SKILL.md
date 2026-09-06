@@ -34,7 +34,8 @@ commit. Confirm:
 * commit messages are imperative and describe the change, not the model;
   They describe tests as covering a bug or preventing future regressions,
   never as adding a regression. Every subject and body line is at most 72
-  characters, with body paragraphs wrapped at natural boundaries close to
+  characters. Require one subject line, exactly one blank line before the
+  body, and contiguous body paragraphs wrapped at natural boundaries close to
   72 rather than prematurely;
 * no private Copilot setup files, session ledgers, generated documentation, or
   unrelated cleanup will appear in the upstream PR. Pre-existing formatting

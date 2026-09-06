@@ -42,8 +42,10 @@ Check that the change:
   series instead of leaving correction-only commits in the published history;
 * uses an imperative commit message with factual claims only;
 * describes tests as covering the bug or preventing future regressions, never
-  as adding a regression, and keeps every commit-message line at 72 characters
-  or fewer. Confirm this with the local commit-message checker.
+  as adding a regression; uses one subject line, one blank line before the
+  body, and contiguous wrapped paragraphs; and keeps every commit-message
+  line at 72 characters or fewer. Confirm this with the local
+  commit-message checker.
 
 If the repository's current CI, contribution rules, or accepted patch patterns
 have changed since the setup was calibrated, report that standards-refresh

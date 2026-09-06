@@ -74,11 +74,14 @@ Work in this order:
 8. Write factual, imperative commit prose. Describe a test as covering the
    bug or preventing future regressions; never write that the commit "adds a
    regression". Keep every subject and body line at 72 characters or fewer,
-   wrapping body paragraphs at natural boundaries close to 72 rather than
-   prematurely. Only after the technical evidence is complete, use `/unslop`
-   on the commit message and any PR prose. Fact-check every sentence against
-   the final diff and ledger. Do not use it for source, tests, or public
-   documentation.
+   put exactly one blank line between the subject and body, and wrap body
+   paragraphs as contiguous lines at natural boundaries close to 72 rather
+   than prematurely. Do not pass each wrapped line as a separate `git commit
+   -m` argument; use a message file or one `-m` argument per paragraph.
+   Run the local commit-message checker after writing the message. Only after
+   the technical evidence is complete, use `/unslop` on the commit message
+   and any PR prose. Fact-check every sentence against the final diff and
+   ledger. Do not use it for source, tests, or public documentation.
 9. Finish with `git diff --check`, a complete diff inspection, the exact
    commands and results in the ledger, and a concise handoff stating remaining
    platform-only checks. Do not claim success for a check that was unavailable

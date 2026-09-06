@@ -74,11 +74,12 @@ release. Before publication, check the final body with
 `check-reference-commit-message.sh`, passing each exact `NAME VERSION` pair
 from the ledger. That checker also enforces commit-message hygiene: describe a
 test as covering the bug or preventing future regressions, never as adding a
-regression, and keep every line at 72 characters or fewer. Wrap body
-paragraphs at natural phrase boundaries close to 72 characters rather than
-arbitrarily early. For an upstream feature commit, pass `--upstream` as well;
-that mode rejects AI `Co-authored-by` trailers in accordance with the current
-upstream contribution policy.
+regression; require one subject line, exactly one blank line before the body,
+contiguous wrapped paragraphs, and every line at 72 characters or fewer.
+Prepare the message with `git commit -F` or one `-m` argument per paragraph,
+not one argument per wrapped line. For an upstream feature commit, pass
+`--upstream` as well; that mode rejects AI `Co-authored-by` trailers in
+accordance with the current upstream contribution policy.
 
 For yaml-cpp-only APIs that cannot be represented by any YAML input, record
 “not applicable” with the reason and retain the owning unit, safety, and

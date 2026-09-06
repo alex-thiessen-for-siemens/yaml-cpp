@@ -10,9 +10,10 @@ Usage: check-reference-commit-message.sh --commit REF \
 Check that the commit body contains a versioned Reference verification block
 and that the complete commit message follows the contribution prose rules.
 Each --reference value must include the exact reference name and version that
-the evidence ledger records. Every message line must be at most 72 characters,
-and tests must not be described as adding a regression. With --upstream, also
-reject AI co-author trailers.
+the evidence ledger records. Require one subject line, exactly one blank line
+before the body, contiguous wrapped paragraphs, and message lines at most 72
+characters. Tests must not be described as adding a regression. With
+--upstream, also reject AI co-author trailers.
 EOF
 }
 
@@ -92,6 +93,83 @@ resolved_commit=$(git rev-parse --verify "${commit}^{commit}" 2>/dev/null) || {
 }
 body=$(git log -1 --format=%b "$resolved_commit")
 message=$(git log -1 --format=%B "$resolved_commit")
+
+message_format_error() {
+  printf 'error: commit message format: %s\n' "$1" >&2
+  exit 1
+}
+
+check_message_format() {
+  local -a message_lines=()
+  local line paragraph_lines=0 paragraph_structured=0
+  local consecutive_single_line=0 last_index
+
+  mapfile -t message_lines < <(printf '%s\n' "$message")
+  while ((${#message_lines[@]} > 0)); do
+    last_index=$((${#message_lines[@]} - 1))
+    [[ -n "${message_lines[last_index]}" ]] && break
+    message_lines=("${message_lines[@]:0:last_index}")
+  done
+
+  ((${#message_lines[@]} > 0)) ||
+    message_format_error "the subject must not be empty"
+  [[ -n "${message_lines[0]}" ]] ||
+    message_format_error "the subject must not be empty"
+  if [[ "${message_lines[0]}" =~ ^[[:space:]] ||
+        "${message_lines[0]}" =~ [[:space:]]$ ]]; then
+    message_format_error "the subject must not have leading or trailing whitespace"
+  fi
+
+  if ((${#message_lines[@]} > 1)); then
+    [[ -z "${message_lines[1]}" ]] ||
+      message_format_error \
+        "the subject must be followed by exactly one blank line"
+  fi
+
+  for ((last_index = 2; last_index < ${#message_lines[@]}; ++last_index)); do
+    line=${message_lines[last_index]}
+    if [[ -z "$line" ]]; then
+      ((paragraph_lines > 0)) ||
+        message_format_error \
+          "body paragraphs must be separated by exactly one blank line"
+      if ((paragraph_lines == 1 && paragraph_structured == 0)); then
+        consecutive_single_line=$((consecutive_single_line + 1))
+      else
+        consecutive_single_line=0
+      fi
+      ((consecutive_single_line < 2)) ||
+        message_format_error \
+          "wrap prose paragraphs as contiguous lines; do not split each line into a separate paragraph"
+      paragraph_lines=0
+      paragraph_structured=0
+      continue
+    fi
+    if [[ "$line" =~ ^[[:space:]]+$ ||
+          "$line" =~ ^[[:space:]] ||
+          "$line" =~ [[:space:]]$ ]]; then
+      message_format_error \
+        "body lines must not have leading, trailing, or whitespace-only formatting"
+    fi
+    if ((paragraph_lines == 0)); then
+      case "$line" in
+        Reference\ verification:*|Co-authored-by:*|Signed-off-by:*|\
+        Fixes\ #*|Closes\ #*|-*|\**)
+          paragraph_structured=1
+          ;;
+      esac
+    fi
+    paragraph_lines=$((paragraph_lines + 1))
+  done
+
+  if ((paragraph_lines == 1 && paragraph_structured == 0)); then
+    consecutive_single_line=$((consecutive_single_line + 1))
+    ((consecutive_single_line < 2)) ||
+      message_format_error \
+        "wrap prose paragraphs as contiguous lines; do not split each line into a separate paragraph"
+  fi
+}
+
+check_message_format
 
 line_number=0
 while IFS= read -r line; do
