@@ -321,6 +321,38 @@ check_changed_formatting() {
   done
 }
 
+changed_line_filter() {
+  local file range start end
+  local first_file=true first_range
+  local escaped_file
+  local -a ranges
+
+  printf '['
+  for file in "${cpp_files[@]}"; do
+    if $first_file; then
+      first_file=false
+    else
+      printf ','
+    fi
+    escaped_file=${file//\\/\\\\}
+    escaped_file=${escaped_file//\"/\\\"}
+    printf '{"name":"%s","lines":[' "$escaped_file"
+    first_range=true
+    mapfile -t ranges < <(changed_line_ranges "$file")
+    for range in "${ranges[@]}"; do
+      IFS=: read -r start end <<<"$range"
+      if $first_range; then
+        first_range=false
+      else
+        printf ','
+      fi
+      printf '[%s,%s]' "$start" "$end"
+    done
+    printf ']}'
+  done
+  printf ']'
+}
+
 check_changed_cppcheck() {
   local output status line diagnostic_file diagnostic_line
   local diagnostics=0 relevant=0
@@ -395,8 +427,10 @@ if ((${#source_files[@]} == 0)); then
   record "SKIP clang-tidy: no changed C++ implementation files"
 else
   if require_tool clang-tidy; then
+    line_filter=$(changed_line_filter)
     run_step "clang-tidy changed C++ files" clang-tidy -p="$debug_build" \
-      --warnings-as-errors='*' "${source_files[@]}"
+      --warnings-as-errors='*' "-line-filter=$line_filter" \
+      "${source_files[@]}"
   fi
 fi
 

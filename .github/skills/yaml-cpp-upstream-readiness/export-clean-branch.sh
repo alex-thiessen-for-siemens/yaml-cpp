@@ -71,7 +71,8 @@ git diff --binary "$base_ref...HEAD" -- . \
   ':(exclude).github/copilot-instructions.md' \
   ':(exclude).github/instructions/**' \
   ':(exclude).github/agents/**' \
-  ':(exclude).github/skills/**' >"$patch_file"
+  ':(exclude).github/skills/**' \
+  ':(exclude)gaps.asciidoc' >"$patch_file"
 
 if [[ ! -s "$patch_file" ]]; then
   printf '%s\n' "error: no contribution changes remain after excluding setup files" >&2

@@ -29,10 +29,10 @@ Use this loop after intake and after each material repair:
 4. Run the smallest relevant CMake test and formatting check first. Then run
    `run-evaluation.sh` on the host or the container runner with the selected
    waivers. Both evaluators use isolated build directories and never change
-   source files. Formatting is checked on changed line ranges, and cppcheck
-   diagnostics are compared with those ranges, so a pre-existing finding on
-   an untouched line must not force unrelated cleanup. A finding in a changed
-   range remains a failure.
+   source files. Formatting and clang-tidy are scoped to changed C++ line
+   ranges, and cppcheck diagnostics are compared with those ranges, so a
+   pre-existing finding on an untouched line must not force unrelated cleanup.
+   A finding in a changed range remains a failure.
 5. Diagnose the first concrete failure. Inspect its output and affected code,
    make one focused repair, and rerun the affected phase. Do not rewrite a
    passing area or restart all model reasoning for an unrelated failure. If
