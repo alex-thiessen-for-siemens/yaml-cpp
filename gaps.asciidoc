@@ -1,0 +1,171 @@
+= yaml-cpp testing-gap survey
+
+This survey identifies contribution-sized testing gaps in `upstream/master` at
+`e5fe9f2` (`Reject failed input streams`). It is a triage document, not a
+claim that the listed cases are defects. Each proposed test must first confirm
+the current public behavior and existing test conventions.
+
+The candidates favor deterministic checks in existing owning suites. A test
+that exposes unexpected behavior becomes a separate bug investigation; do not
+adjust the assertion merely to keep a test-only contribution passing.
+
+== Recommended first contribution
+
+=== Stream failure during BOM or encoding detection
+
+*Implementation:* `src/stream.cpp`, `Stream::Stream(std::istream&)`.
+
+*Owning suite:* `test/integration/load_node_test.cpp`.
+
+The recent upstream stream-safety change in `#1486` tests pre-failed streams
+and a failure during bulk stream-buffer reads. Its BOM and encoding detection
+loop independently calls `input.get()` and rejects bad or non-EOF failure
+states. No current test makes that path fail.
+
+Add a small stream buffer whose first `underflow()` throws
+`std::ios_base::failure`, construct an `std::istream` from it, and assert that
+`YAML::Load(stream)` throws `YAML::BadStream`.
+
+This is a narrow C++11-compatible test-only contribution that protects a
+distinct branch in a recently changed failure path. It is the best first
+candidate because the intended exception is explicit and the fixture does not
+depend on YAML formatting or parser semantics.
+
+== High-confidence candidates
+
+=== Malformed directive and duplicate-property rejection
+
+*Implementation:* `src/parser.cpp` and `src/singledocparser.cpp`.
+
+*Owning suite:* `test/integration/node_spec_test.cpp`, with existing parser
+error helpers where appropriate.
+
+Valid and repeated directives are covered, but direct parser validation paths
+are not. A focused contribution could assert the existing error constants for:
+
+* a `%YAML` directive with missing arguments;
+* a malformed YAML version;
+* an unsupported YAML major version such as `2.0`;
+* a `%TAG` directive with missing arguments;
+* two tags on one node, such as `!a !b value`; or
+* two anchors on one node, such as `&a &b value`.
+
+Keep directives and duplicate properties as one contribution only if their
+fixtures use the same existing error-test helper and share the parser-property
+invariant. Scanner token-boundary cases belong in a separate change.
+
+=== Verbatim tags and named tag-handle boundaries
+
+*Implementation:* `src/scantag.cpp`.
+
+*Owning suite:* `test/integration/node_spec_test.cpp` or a focused parser test.
+
+Valid verbatim tags and encoded suffixes are covered, but the scanner's
+rejection paths for an unterminated verbatim tag and an invalid named tag
+handle are not. Candidate fixtures include an unterminated
+`!<tag:yaml.org,2002:str` and a handle that transitions out of valid handle
+characters before encountering another `!`.
+
+Before writing the test, confirm the exact `YAML::ErrorMsg` and mark reported
+by the current parser. Do not enable a disabled YAML-spec example without
+first establishing that its expected semantics are deliberately supported.
+
+=== Clone metadata and independence
+
+*Implementation:* `src/node.cpp`, `src/nodeevents.cpp`, and
+`src/nodebuilder.cpp`.
+
+*Owning suite:* `test/integration/clone_node_test.cpp`.
+
+`YAML::Clone` transfers tags and collection style through the event and node
+builder paths. The existing clone test thoroughly verifies marks but does not
+assert nested tags, flow style, or independence after a clone mutation.
+
+Load a nested flow collection with root and child tags, clone it, assert that
+the clone preserves both tags and the flow style, then change a clone value and
+assert that the original value remains unchanged.
+
+This protects public clone behavior without modifying production code.
+
+=== Node iterator semantics
+
+*Implementation:* `include/yaml-cpp/node/detail/reverse_iterator.h` and the
+node iterator wrappers.
+
+*Owning suite:* `test/node/node_test.cpp`.
+
+Recent reverse-iterator tests mostly count elements rather than asserting
+value order. Map iterator tests also omit mutation through a non-const
+iterator. Choose one contract per pull request:
+
+* a sequence `a`, `b`, `c` must yield `c`, `b`, `a` through `rbegin()`; or
+* modifying `it->second` while iterating a map must change the map value.
+
+The first option is recommended because reverse-iterator support was added
+recently and count-only assertions could miss incorrect decrement or
+dereference behavior.
+
+=== Binary API boundaries
+
+*Implementation:* `src/binary.cpp` and `include/yaml-cpp/binary.h`.
+
+*Owning suite:* `test/binary_test.cpp`.
+
+Direct Base64 tests omit one-byte and two-byte padding boundaries, while
+`YAML::Binary` lacks coverage for its borrowed-to-owned `swap()` transition.
+Choose one focused contract:
+
+* verify encode/decode round trips for `Zg==`, `Zm8=`, and `Zm9v`; or
+* construct borrowed binary data, swap it into a vector, then verify the
+  binary becomes owned and both byte sequences have the expected values.
+
+Do not repeat the whitespace-separated-padding case already proposed in
+`jbeder/yaml-cpp#1491`.
+
+=== Emitter and ostream-wrapper state boundaries
+
+*Implementation:* `src/emitter.cpp`, `src/emitterstate.cpp`, and
+`src/ostream_wrapper.cpp`.
+
+*Owning suites:* `test/integration/emitter_test.cpp` and
+`test/ostream_wrapper_test.cpp`.
+
+Three independent public states lack direct coverage:
+
+* an `YAML::Emitter` constructed with an external `std::ostream`, including
+  its `c_str()`, `size()`, and `good()` contract;
+* a size-explicit ostream-wrapper write containing an embedded NUL byte; and
+* ending a sequence with `EndMap` or a map with `EndSeq`, which should report
+  the existing unmatched-group error.
+
+Submit one state boundary at a time. The external-stream constructor is the
+clearest user-visible API contract.
+
+== Probe before proposing a test-only change
+
+=== Malformed UTF-16 surrogate handling
+
+*Implementation:* `src/stream.cpp`, `Stream::StreamInUtf16()`.
+
+*Owning suite:* `test/integration/encoding_test.cpp`.
+
+Encoding tests cover valid UTF-8, UTF-16, and UTF-32 byte streams but omit
+lone low surrogates and malformed surrogate pairs. The implementation queues
+the Unicode replacement character for these cases.
+
+First determine the intended YAML-level result with the local reference-check
+workflow and record the fixture, schema, implementation version, and
+normalization. If a compatible reference disagrees or yaml-cpp behaves
+unexpectedly, treat the result as a bug investigation rather than a
+test-only contribution.
+
+== Deferred scope
+
+Issue `#38`, a complete YAML 1.2 conformance suite, is valuable but spans many
+fixtures and semantics decisions. It is not suitable for a small focused pull
+request.
+
+Objective line coverage was not generated for this survey because planning
+mode does not permit a disposable coverage build. The prioritization instead
+maps explicit implementation branches and public states to their existing
+owning tests.
