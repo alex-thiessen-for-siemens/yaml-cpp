@@ -21,6 +21,9 @@ commit. Confirm:
   naming every reference library, exact version, schema or parser layer, and
   result when comparison passed, or an explicit not-applicable reason;
   run `check-reference-commit-message.sh` against that commit before export;
+* the current upstream `CONTRIBUTING.md` AI-usage policy is followed. AI is a
+  tool, not a co-author, so upstream feature commits contain no AI
+  `Co-authored-by` trailer; run the commit checker in upstream mode;
 * CMake source lists, Bazel targets or globs, installation, package checks,
   and CI implications were considered when relevant;
 * `git diff --check` passes, changed C++ files match `.clang-format`, and the

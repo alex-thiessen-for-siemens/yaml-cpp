@@ -25,6 +25,9 @@ Check that the change:
   result for every reference; otherwise it contains the explicit limitation;
   confirm it with `check-reference-commit-message.sh` rather than trusting
   an unversioned prose claim;
+* follows the current upstream `CONTRIBUTING.md` AI-usage policy. AI is a
+  tool, not a co-author, so upstream feature commits contain no AI
+  `Co-authored-by` trailer. Confirm this with the checker in upstream mode;
 * preserves C++11, public API/ABI, exception, ownership, package, and platform
   contracts;
 * updates CMake, Bazel, installation, or CI only when the change requires it;

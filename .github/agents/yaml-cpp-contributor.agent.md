@@ -66,9 +66,11 @@ Work in this order:
    If a reference comparison passed, put a `Reference verification:` block in
    the feature commit body with every reference name, exact version, schema or
    layer, and result. If none applies, put the explicit not-applicable reason
-   in the body. Run
-   `.github/skills/yaml-cpp-reference-check/check-reference-commit-message.sh`
-   against the final feature commit before publication.
+   in the body. Read the current upstream `CONTRIBUTING.md`; AI is a tool, not
+   a co-author, so remove AI `Co-authored-by` trailers from upstream feature
+   commits. Run
+   `.github/skills/yaml-cpp-reference-check/check-reference-commit-message.sh
+   --upstream` against the final feature commit before publication.
 8. Write factual, imperative commit prose. Describe a test as covering the
    bug or preventing future regressions; never write that the commit "adds a
    regression". Keep every subject and body line at 72 characters or fewer,

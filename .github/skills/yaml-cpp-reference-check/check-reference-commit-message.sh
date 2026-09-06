@@ -5,13 +5,14 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage: check-reference-commit-message.sh --commit REF \
-  (--reference "NAME VERSION" ... | --not-applicable REASON)
+  [--upstream] (--reference "NAME VERSION" ... | --not-applicable REASON)
 
 Check that the commit body contains a versioned Reference verification block
 and that the complete commit message follows the contribution prose rules.
 Each --reference value must include the exact reference name and version that
 the evidence ledger records. Every message line must be at most 72 characters,
-and tests must not be described as adding a regression.
+and tests must not be described as adding a regression. With --upstream, also
+reject AI co-author trailers.
 EOF
 }
 
@@ -24,6 +25,7 @@ cd "${repo_root}" || exit 2
 commit=
 references=()
 not_applicable=
+upstream_mode=0
 
 while (($# > 0)); do
   case "$1" in
@@ -50,6 +52,10 @@ while (($# > 0)); do
       }
       not_applicable=$2
       shift 2
+      ;;
+    --upstream)
+      upstream_mode=1
+      shift
       ;;
     --help|-h)
       usage
@@ -103,6 +109,15 @@ if grep -Eiq \
   printf '%s\n' \
     'error: describe a test as covering the bug or preventing regressions,' \
     'not as adding a regression' >&2
+  exit 1
+fi
+
+if ((upstream_mode)) && grep -Eiq \
+  '^Co-authored-by:.*(AI|Copilot|Claude|GPT|Gemini|OpenAI|Anthropic)([^[:alnum:]]|$)' \
+  <<<"$message"; then
+  printf '%s\n' \
+    'error: upstream feature commits must not name AI as a co-author' \
+    >&2
   exit 1
 fi
 

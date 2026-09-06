@@ -77,6 +77,10 @@ the source of current standards, not this setup's older examples.
 Before presenting a contribution, run `git diff --check`, inspect the complete
 diff against its intended base, and verify that the final branch contains no
 private setup files. Use `/yaml-cpp-upstream-readiness` for the final check.
+Read the current upstream `CONTRIBUTING.md` before publication. In particular,
+follow its AI-usage policy: AI is a tool, not a co-author, so never include an
+AI `Co-authored-by` trailer in an upstream feature commit. Use the upstream
+mode of the local commit-message checker to enforce this.
 Write imperative commit messages and describe tests as covering a bug or
 preventing future regressions. Never say that a commit "adds a regression":
 that wording implies that the contribution introduces a defect. Keep every
