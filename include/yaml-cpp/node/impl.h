@@ -23,6 +23,7 @@
 #include "yaml-cpp/node/node.h"
 #include <sstream>
 #include <string>
+#include <utility>
 
 namespace YAML {
 inline Node::Node()
@@ -52,6 +53,17 @@ inline Node::Node(const detail::iterator_value& rhs)
       m_pNode(rhs.m_pNode) {}
 
 inline Node::Node(const Node&) = default;
+
+inline Node::Node(Node&& rhs) YAML_CPP_NOEXCEPT
+    : m_isValid(rhs.m_isValid),
+      m_invalidKey(std::move(rhs.m_invalidKey)),
+      m_pMemory(std::move(rhs.m_pMemory)),
+      m_pNode(rhs.m_pNode) {
+  rhs.m_isValid = true;
+  rhs.m_invalidKey.clear();
+  rhs.m_pMemory.reset();
+  rhs.m_pNode = nullptr;
+}
 
 inline Node::Node(Zombie)
     : m_isValid(false), m_invalidKey{}, m_pMemory{}, m_pNode(nullptr) {}

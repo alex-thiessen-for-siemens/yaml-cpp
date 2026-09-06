@@ -25,6 +25,7 @@
 #include "yaml-cpp/node/detail/iterator_fwd.h"
 #include "yaml-cpp/node/ptr.h"
 #include "yaml-cpp/node/type.h"
+#include "yaml-cpp/noexcept.h"
 
 namespace YAML {
 namespace detail {
@@ -58,6 +59,7 @@ class YAML_CPP_API Node {
   explicit Node(const T& rhs);
   explicit Node(const detail::iterator_value& rhs);
   Node(const Node& rhs);
+  Node(Node&& rhs) YAML_CPP_NOEXCEPT;
   ~Node();
 
   YAML::Mark Mark() const;
