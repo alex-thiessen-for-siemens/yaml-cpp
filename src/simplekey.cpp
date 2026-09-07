@@ -112,8 +112,9 @@ bool Scanner::VerifySimpleKey() {
 
   bool isValid = true;
 
-  // needs to be less than 1024 characters and inline
-  if (INPUT.line() != key.mark.line || INPUT.pos() - key.mark.pos > 1024)
+  // needs to be less than 1024 characters; block keys must be inline
+  if ((InBlockContext() && INPUT.line() != key.mark.line) ||
+      INPUT.pos() - key.mark.pos > 1024)
     isValid = false;
 
   // invalidate key

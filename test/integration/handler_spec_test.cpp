@@ -1714,8 +1714,7 @@ TEST_F(HandlerSpecTest, DISABLED_Ex9_3_BareDocuments) {
   Parse(ex9_3);
 }
 
-TEST_F(HandlerSpecTest, DISABLED_Ex9_4_ExplicitDocuments) {
-  // SPEC_GAP: yaml-cpp rejects the percent character in this flow key.
+TEST_F(HandlerSpecTest, Ex9_4_ExplicitDocuments) {
   EXPECT_CALL(handler, OnDocumentStart(_));
   EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Flow));
   EXPECT_CALL(handler, OnScalar(_, "?", 0, "matches %"));

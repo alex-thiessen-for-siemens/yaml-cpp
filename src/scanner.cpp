@@ -117,7 +117,8 @@ void Scanner::ScanNextToken() {
     return EndStream();
   }
 
-  if (INPUT.column() == 0 && INPUT.peek() == Keys::Directive) {
+  if (!InFlowContext() && INPUT.column() == 0 &&
+      INPUT.peek() == Keys::Directive) {
     return ScanDirective();
   }
 

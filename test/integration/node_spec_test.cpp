@@ -1181,8 +1181,7 @@ TEST(NodeSpecTest, DISABLED_Ex9_3_BareDocuments) {
   EXPECT_EQ("%!PS-Adobe-2.0\n", docs[1].as<std::string>());
 }
 
-TEST(NodeSpecTest, DISABLED_Ex9_4_ExplicitDocuments) {
-  // SPEC_GAP: yaml-cpp rejects the percent character in this flow key.
+TEST(NodeSpecTest, Ex9_4_ExplicitDocuments) {
   std::vector<Node> docs = LoadAll(ex9_4);
   ASSERT_EQ(2u, docs.size());
   ASSERT_EQ(1u, docs[0].size());
