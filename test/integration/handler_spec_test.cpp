@@ -1835,5 +1835,17 @@ TEST_F(HandlerSpecTest, Ex10_4_NullExamples) {
   Parse(ex10_4);
 }
 
+TEST_F(HandlerSpecTest, Ex10_5_BooleanExamples) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "YAML is a superset of JSON"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:bool", 0, "true"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Pluto is a planet"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:bool", 0, "false"));
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex10_5);
+}
+
 }  // namespace
 }  // namespace YAML
