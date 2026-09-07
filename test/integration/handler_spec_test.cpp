@@ -1879,5 +1879,44 @@ TEST_F(HandlerSpecTest, Ex10_7_FloatingPointExamples) {
   Parse(ex10_7);
 }
 
+TEST_F(HandlerSpecTest, DISABLED_Ex10_8_JsonTagResolution) {
+  // SPEC_GAP: yaml-cpp emits "Null" as an implicit null event, while the
+  // YAML 1.2 JSON schema requires that value to remain a string scalar.
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "A null"));
+  EXPECT_CALL(handler, OnNull(_, 0));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Booleans"));
+  EXPECT_CALL(handler, OnSequenceStart(_, "?", 0, EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "true"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "false"));
+  EXPECT_CALL(handler, OnSequenceEnd());
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Integers"));
+  EXPECT_CALL(handler, OnSequenceStart(_, "?", 0, EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "0"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "-0"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "3"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "-19"));
+  EXPECT_CALL(handler, OnSequenceEnd());
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Floats"));
+  EXPECT_CALL(handler, OnSequenceStart(_, "?", 0, EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "0."));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "-0.0"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "12e03"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "-2E+05"));
+  EXPECT_CALL(handler, OnSequenceEnd());
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Invalid"));
+  EXPECT_CALL(handler, OnSequenceStart(_, "?", 0, EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "True"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Null"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "0o7"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "0x3A"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "+12.3"));
+  EXPECT_CALL(handler, OnSequenceEnd());
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex10_8);
+}
+
 }  // namespace
 }  // namespace YAML
