@@ -1809,5 +1809,19 @@ TEST_F(HandlerSpecTest, Ex10_2_SequenceExamples) {
   Parse(ex10_2);
 }
 
+TEST_F(HandlerSpecTest, Ex10_3_StringExamples) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Block style"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:str", 0,
+                                "String: just a theory."));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Flow style"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:str", 0,
+                                "String: just a theory."));
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex10_3);
+}
+
 }  // namespace
 }  // namespace YAML
