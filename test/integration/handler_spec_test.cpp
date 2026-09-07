@@ -1823,5 +1823,17 @@ TEST_F(HandlerSpecTest, Ex10_3_StringExamples) {
   Parse(ex10_3);
 }
 
+TEST_F(HandlerSpecTest, Ex10_4_NullExamples) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:null", 0, "null"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "value for null key"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "key with null value"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:null", 0, "null"));
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex10_4);
+}
+
 }  // namespace
 }  // namespace YAML

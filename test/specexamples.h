@@ -948,4 +948,8 @@ const char *ex10_3 =
     "\n"
     "Flow style: !!str \"String: just a theory.\"";
 
+const char *ex10_4 =
+    "!!null null: value for null key\n"
+    "key with null value: !!null null";
+
 }
