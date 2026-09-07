@@ -942,4 +942,10 @@ const char *ex10_2 =
     "\n"
     "Flow style: !!seq [ Clark Evans, Ingy döt Net, Oren Ben-Kiki ]";
 
+const char *ex10_3 =
+    "Block style: !!str |-\n"
+    "  String: just a theory.\n"
+    "\n"
+    "Flow style: !!str \"String: just a theory.\"";
+
 }
