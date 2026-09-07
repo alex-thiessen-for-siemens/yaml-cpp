@@ -481,8 +481,10 @@ TEST(NodeSpecTest, Ex5_8_QuotedScalarIndicators) {
   EXPECT_EQ("text", doc["double"].as<std::string>());
 }
 
-// TODO: 5.9 directive
-// TODO: 5.10 reserved indicator
+TEST(NodeSpecTest, Ex5_9_DirectiveIndicator) {
+  Node doc = Load(ex5_9);
+  EXPECT_EQ("text", doc.as<std::string>());
+}
 
 TEST(NodeSpecTest, Ex5_11_LineBreakCharacters) {
   Node doc = Load(ex5_11);
