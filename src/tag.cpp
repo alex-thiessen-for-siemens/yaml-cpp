@@ -7,7 +7,7 @@
 
 namespace YAML {
 Tag::Tag(const Token& token)
-    : type(static_cast<TYPE>(token.data)), handle{}, value{} {
+    : type(static_cast<TYPE>(token.data)), handle{}, value{}, mark(token.mark) {
   switch (type) {
     case VERBATIM:
       value = token.value;
@@ -34,11 +34,11 @@ std::string Tag::Translate(const Directives& directives) const {
     case VERBATIM:
       return value;
     case PRIMARY_HANDLE:
-      return directives.TranslateTagHandle("!") + value;
+      return directives.TranslateTagHandle("!", mark) + value;
     case SECONDARY_HANDLE:
-      return directives.TranslateTagHandle("!!") + value;
+      return directives.TranslateTagHandle("!!", mark) + value;
     case NAMED_HANDLE:
-      return directives.TranslateTagHandle("!" + handle + "!") + value;
+      return directives.TranslateTagHandle("!" + handle + "!", mark) + value;
     case NON_SPECIFIC:
       // TODO:
       return "!";

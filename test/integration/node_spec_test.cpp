@@ -737,10 +737,8 @@ TEST(NodeSpecTest, Ex6_27a_InvalidTagShorthands) {
   EXPECT_THROW_PARSER_EXCEPTION(Load(ex6_27a), ErrorMsg::TAG_WITH_NO_SUFFIX);
 }
 
-// TODO: should we reject this one (since !h! is not declared)?
-TEST(NodeSpecTest, DISABLED_Ex6_27b_InvalidTagShorthands) {
-  Load(ex6_27b);
-  FAIL() << "not implemented yet";
+TEST(NodeSpecTest, Ex6_27b_InvalidTagShorthands) {
+  EXPECT_THROW_PARSER_EXCEPTION(Load(ex6_27b), ErrorMsg::UNDECLARED_TAG_HANDLE);
 }
 
 TEST(NodeSpecTest, Ex6_28_NonSpecificTags) {

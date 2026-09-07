@@ -10,6 +10,8 @@
 #include <string>
 #include <map>
 
+#include "yaml-cpp/mark.h"
+
 namespace YAML {
 struct Version {
   bool isDefault;
@@ -19,7 +21,8 @@ struct Version {
 struct Directives {
   Directives();
 
-  std::string TranslateTagHandle(const std::string& handle) const;
+  std::string TranslateTagHandle(const std::string& handle,
+                                 const Mark& mark = Mark::null_mark()) const;
 
   Version version;
   std::map<std::string, std::string> tags;

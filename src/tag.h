@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include "yaml-cpp/mark.h"
+
 namespace YAML {
 struct Directives;
 struct Token;
@@ -27,6 +29,7 @@ struct Tag {
 
   TYPE type;
   std::string handle, value;
+  Mark mark;
 };
 }
 

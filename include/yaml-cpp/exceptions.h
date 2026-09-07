@@ -37,6 +37,7 @@ const char* const REPEATED_TAG_DIRECTIVE = "repeated TAG directive";
 const char* const CHAR_IN_TAG_HANDLE =
     "illegal character found while scanning tag handle";
 const char* const TAG_WITH_NO_SUFFIX = "tag handle with no suffix";
+const char* const UNDECLARED_TAG_HANDLE = "undeclared tag handle";
 const char* const END_OF_VERBATIM_TAG = "end of verbatim tag not found";
 const char* const END_OF_MAP = "end of map not found";
 const char* const END_OF_MAP_FLOW = "end of map flow not found";

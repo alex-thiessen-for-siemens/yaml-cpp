@@ -1032,10 +1032,9 @@ TEST_F(HandlerSpecTest, Ex6_27a_InvalidTagShorthands) {
                                 ErrorMsg::TAG_WITH_NO_SUFFIX);
 }
 
-// TODO: should we reject this one (since !h! is not declared)?
-TEST_F(HandlerSpecTest, DISABLED_Ex6_27b_InvalidTagShorthands) {
-  Parse(ex6_27b);
-  FAIL() << "not implemented yet";
+TEST_F(HandlerSpecTest, Ex6_27b_InvalidTagShorthands) {
+  EXPECT_THROW_PARSER_EXCEPTION(IgnoreParse(ex6_27b),
+                                ErrorMsg::UNDECLARED_TAG_HANDLE);
 }
 
 TEST_F(HandlerSpecTest, Ex6_28_NonSpecificTags) {
