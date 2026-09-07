@@ -257,6 +257,14 @@ TEST(NodeSpecTest, Ex2_20_FloatingPoint) {
   EXPECT_TRUE(std::isnan(doc["not a number"].as<double>()));
 }
 
+TEST(NodeSpecTest, Ex2_21_Miscellaneous) {
+  Node doc = Load(ex2_21);
+  EXPECT_TRUE(doc[Null].IsNull());
+  EXPECT_TRUE(doc["booleans"][0].as<bool>());
+  EXPECT_FALSE(doc["booleans"][1].as<bool>());
+  EXPECT_EQ("012345", doc["string"].as<std::string>());
+}
+
 TEST(NodeSpecTest, Ex2_23_VariousExplicitTags) {
   Node doc = Load(ex2_23);
   EXPECT_EQ(3, doc.size());
