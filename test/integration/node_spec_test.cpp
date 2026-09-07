@@ -426,7 +426,7 @@ TEST(NodeSpecTest, Ex2_28_LogFile) {
   }
 }
 
-// TODO: 5.1 - 5.2 BOM
+TEST(NodeSpecTest, Ex5_1_ByteOrderMark) { EXPECT_TRUE(Load(ex5_1).IsNull()); }
 
 TEST(NodeSpecTest, Ex5_3_BlockStructureIndicators) {
   Node doc = Load(ex5_3);
