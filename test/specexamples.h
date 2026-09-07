@@ -986,5 +986,4 @@ const char *ex10_9 =
     "  0., -0.0, .5, +12e03, -2E+05 ]\n"
     "Also floats: [\n"
     "  .inf, -.Inf, +.INF, .NAN ]";
-
 }
