@@ -1176,6 +1176,15 @@ TEST(NodeSpecTest, Ex9_2_DocumentMarkers) {
   EXPECT_EQ("Document", Load(ex9_2).as<std::string>());
 }
 
+TEST(NodeSpecTest, DISABLED_Ex9_3_BareDocuments) {
+  // SPEC_GAP: yaml-cpp rejects a bare literal document after an empty
+  // document marker.
+  std::vector<Node> docs = LoadAll(ex9_3);
+  ASSERT_EQ(2u, docs.size());
+  EXPECT_EQ("Bare document", docs[0].as<std::string>());
+  EXPECT_EQ("%!PS-Adobe-2.0\n", docs[1].as<std::string>());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
