@@ -883,4 +883,10 @@ const char *ex9_1 =
     "# lines\n"
     "Document";
 
+const char *ex9_2 =
+    "%YAML 1.2\n"
+    "---\n"
+    "Document\n"
+    "... # Suffix";
+
 }

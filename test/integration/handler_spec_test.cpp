@@ -1698,5 +1698,12 @@ TEST_F(HandlerSpecTest, Ex9_1_DocumentPrefix) {
   Parse(ex9_1);
 }
 
+TEST_F(HandlerSpecTest, Ex9_2_DocumentMarkers) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Document"));
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex9_2);
+}
+
 }  // namespace
 }  // namespace YAML
