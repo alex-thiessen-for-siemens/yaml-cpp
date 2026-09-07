@@ -1847,5 +1847,19 @@ TEST_F(HandlerSpecTest, Ex10_5_BooleanExamples) {
   Parse(ex10_5);
 }
 
+TEST_F(HandlerSpecTest, Ex10_6_IntegerExamples) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "negative"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:int", 0, "-12"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "zero"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:int", 0, "0"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "positive"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:int", 0, "34"));
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex10_6);
+}
+
 }  // namespace
 }  // namespace YAML

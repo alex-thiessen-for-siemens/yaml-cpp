@@ -956,4 +956,9 @@ const char *ex10_5 =
     "YAML is a superset of JSON: !!bool true\n"
     "Pluto is a planet: !!bool false";
 
+const char *ex10_6 =
+    "negative: !!int -12\n"
+    "zero: !!int 0\n"
+    "positive: !!int 34";
+
 }
