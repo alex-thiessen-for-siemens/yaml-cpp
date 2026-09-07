@@ -976,4 +976,15 @@ const char *ex10_8 =
     "Invalid: [ True, Null,\n"
     "  0o7, 0x3A, +12.3 ]";
 
+const char *ex10_9 =
+    "A null: null\n"
+    "Also a null: # Empty\n"
+    "Not a null: \"\"\n"
+    "Booleans: [ true, True, false, FALSE ]\n"
+    "Integers: [ 0, 0o7, 0x3A, -19 ]\n"
+    "Floats: [\n"
+    "  0., -0.0, .5, +12e03, -2E+05 ]\n"
+    "Also floats: [\n"
+    "  .inf, -.Inf, +.INF, .NAN ]";
+
 }

@@ -1918,5 +1918,48 @@ TEST_F(HandlerSpecTest, DISABLED_Ex10_8_JsonTagResolution) {
   Parse(ex10_8);
 }
 
+TEST_F(HandlerSpecTest, Ex10_9_CoreTagResolution) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "A null"));
+  EXPECT_CALL(handler, OnNull(_, 0));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Also a null"));
+  EXPECT_CALL(handler, OnNull(_, 0));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Not a null"));
+  EXPECT_CALL(handler, OnScalar(_, "!", 0, ""));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Booleans"));
+  EXPECT_CALL(handler, OnSequenceStart(_, "?", 0, EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "true"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "True"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "false"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "FALSE"));
+  EXPECT_CALL(handler, OnSequenceEnd());
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Integers"));
+  EXPECT_CALL(handler, OnSequenceStart(_, "?", 0, EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "0"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "0o7"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "0x3A"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "-19"));
+  EXPECT_CALL(handler, OnSequenceEnd());
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Floats"));
+  EXPECT_CALL(handler, OnSequenceStart(_, "?", 0, EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "0."));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "-0.0"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, ".5"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "+12e03"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "-2E+05"));
+  EXPECT_CALL(handler, OnSequenceEnd());
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Also floats"));
+  EXPECT_CALL(handler, OnSequenceStart(_, "?", 0, EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, ".inf"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "-.Inf"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "+.INF"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, ".NAN"));
+  EXPECT_CALL(handler, OnSequenceEnd());
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex10_9);
+}
+
 }  // namespace
 }  // namespace YAML
