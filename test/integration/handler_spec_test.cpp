@@ -1690,5 +1690,13 @@ TEST_F(HandlerSpecTest, Ex8_22_BlockCollectionNodes) {
   EXPECT_CALL(handler, OnDocumentEnd());
   Parse(ex8_22);
 }
+
+TEST_F(HandlerSpecTest, Ex9_1_DocumentPrefix) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Document"));
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex9_1);
+}
+
 }  // namespace
 }  // namespace YAML

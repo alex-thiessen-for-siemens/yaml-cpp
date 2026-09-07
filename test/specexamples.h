@@ -877,4 +877,10 @@ const char *ex8_22 =
     " - nested\n"
     "mapping: !!map\n"
     " foo: bar\n";
+
+const char *ex9_1 =
+    "# Comment\n"
+    "# lines\n"
+    "Document";
+
 }
