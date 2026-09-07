@@ -968,4 +968,12 @@ const char *ex10_7 =
     "infinity: !!float .inf\n"
     "not a number: !!float .nan";
 
+const char *ex10_8 =
+    "A null: null\n"
+    "Booleans: [ true, false ]\n"
+    "Integers: [ 0, -0, 3, -19 ]\n"
+    "Floats: [ 0., -0.0, 12e03, -2E+05 ]\n"
+    "Invalid: [ True, Null,\n"
+    "  0o7, 0x3A, +12.3 ]";
+
 }
