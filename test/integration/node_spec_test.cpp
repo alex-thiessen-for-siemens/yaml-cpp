@@ -1172,6 +1172,10 @@ TEST(NodeSpecTest, Ex9_1_DocumentPrefix) {
   EXPECT_EQ("Document", Load(ex9_1).as<std::string>());
 }
 
+TEST(NodeSpecTest, Ex9_2_DocumentMarkers) {
+  EXPECT_EQ("Document", Load(ex9_2).as<std::string>());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
