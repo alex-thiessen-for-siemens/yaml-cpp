@@ -486,6 +486,10 @@ TEST(NodeSpecTest, Ex5_9_DirectiveIndicator) {
   EXPECT_EQ("text", doc.as<std::string>());
 }
 
+TEST(NodeSpecTest, Ex5_10_InvalidUseOfReservedIndicators) {
+  EXPECT_THROW(Load(ex5_10), ParserException);
+}
+
 TEST(NodeSpecTest, Ex5_11_LineBreakCharacters) {
   Node doc = Load(ex5_11);
   EXPECT_TRUE(doc.as<std::string>() ==
