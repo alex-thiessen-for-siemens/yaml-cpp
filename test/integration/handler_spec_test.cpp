@@ -1743,5 +1743,21 @@ TEST_F(HandlerSpecTest, DISABLED_Ex9_5_DirectivesDocuments) {
   Parse(ex9_5);
 }
 
+TEST_F(HandlerSpecTest, Ex9_6_Stream) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Document"));
+  EXPECT_CALL(handler, OnDocumentEnd());
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnNull(_, 0));
+  EXPECT_CALL(handler, OnDocumentEnd());
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "matches %"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "20"));
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex9_6);
+}
+
 }  // namespace
 }  // namespace YAML

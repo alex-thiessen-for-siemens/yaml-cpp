@@ -917,4 +917,13 @@ const char *ex9_5 =
     "# Empty\n"
     "...";
 
+const char *ex9_6 =
+    "Document\n"
+    "---\n"
+    "# Empty\n"
+    "...\n"
+    "%YAML 1.2\n"
+    "---\n"
+    "matches %: 20";
+
 }
