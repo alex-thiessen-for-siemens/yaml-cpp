@@ -326,8 +326,9 @@ const char *ex5_8 =
     "single: 'text'\n"
     "double: \"text\"";
 
-// TODO: 5.9 directive
-// TODO: 5.10 reserved indicator
+const char *ex5_9 =
+    "%YAML 1.2\n"
+    "--- text";
 
 const char *ex5_11 =
     "|\n"
