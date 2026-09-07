@@ -926,4 +926,12 @@ const char *ex9_6 =
     "---\n"
     "matches %: 20";
 
+const char *ex10_1 =
+    "Block style: !!map\n"
+    "  Clark : Evans\n"
+    "  Ingy  : döt Net\n"
+    "  Oren  : Ben-Kiki\n"
+    "\n"
+    "Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }";
+
 }

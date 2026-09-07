@@ -1759,5 +1759,33 @@ TEST_F(HandlerSpecTest, Ex9_6_Stream) {
   Parse(ex9_6);
 }
 
+TEST_F(HandlerSpecTest, Ex10_1_MapExamples) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Block style"));
+  EXPECT_CALL(handler,
+              OnMapStart(_, "tag:yaml.org,2002:map", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Clark"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Evans"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Ingy"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "döt Net"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Oren"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Ben-Kiki"));
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Flow style"));
+  EXPECT_CALL(handler,
+              OnMapStart(_, "tag:yaml.org,2002:map", 0, EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Clark"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Evans"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Ingy"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "döt Net"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Oren"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Ben-Kiki"));
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex10_1);
+}
+
 }  // namespace
 }  // namespace YAML
