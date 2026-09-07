@@ -290,6 +290,11 @@ const char *ex5_1 =
     "\xEF\xBB\xBF"
     "# Comment only.";
 
+const char *ex5_2 =
+    "- Invalid use of BOM\n"
+    "\xEF\xBB\xBF"
+    "- Inside a document.";
+
 const char *ex5_3 =
     "sequence:\n"
     "- one\n"
