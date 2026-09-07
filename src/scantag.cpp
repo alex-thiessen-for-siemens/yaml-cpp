@@ -1,3 +1,5 @@
+#include <cctype>
+
 #include "exp.h"
 #include "regex_yaml.h"
 #include "regeximpl.h"
@@ -6,8 +8,32 @@
 #include "yaml-cpp/mark.h"
 
 namespace YAML {
+namespace {
+bool IsValidVerbatimTag(const std::string& tag) {
+  if (tag.empty())
+    return false;
+  if (tag[0] == '!') {
+    return tag.size() > 1;
+  }
+  std::size_t colon = tag.find(':');
+  if (colon != std::string::npos) {
+    if (!std::isalpha(static_cast<unsigned char>(tag[0])))
+      return false;
+    for (std::size_t i = 1; i < colon; ++i) {
+      char ch = tag[i];
+      if (!std::isalnum(static_cast<unsigned char>(ch)) && ch != '+' &&
+          ch != '-' && ch != '.') {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+}  // namespace
+
 std::string ScanVerbatimTag(Stream& INPUT) {
   std::string tag;
+  Mark start = INPUT.mark();
 
   // eat the start character
   INPUT.get();
@@ -16,6 +42,8 @@ std::string ScanVerbatimTag(Stream& INPUT) {
     if (INPUT.peek() == Keys::VerbatimTagEnd) {
       // eat the end character
       INPUT.get();
+      if (!IsValidVerbatimTag(tag))
+        throw ParserException(start, ErrorMsg::INVALID_TAG);
       return tag;
     }
 

@@ -1011,10 +1011,8 @@ TEST_F(HandlerSpecTest, Ex6_24_VerbatimTags) {
   Parse(ex6_24);
 }
 
-// TODO: Implement
-TEST_F(HandlerSpecTest, DISABLED_Ex6_25_InvalidVerbatimTags) {
-  Parse(ex6_25);
-  FAIL() << "not implemented yet";
+TEST_F(HandlerSpecTest, Ex6_25_InvalidVerbatimTags) {
+  EXPECT_THROW(IgnoreParse(ex6_25), ParserException);
 }
 
 TEST_F(HandlerSpecTest, Ex6_26_TagShorthands) {

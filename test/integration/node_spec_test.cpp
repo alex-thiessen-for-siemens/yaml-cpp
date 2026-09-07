@@ -718,10 +718,8 @@ TEST(NodeSpecTest, Ex6_24_VerbatimTags) {
   }
 }
 
-TEST(NodeSpecTest, DISABLED_Ex6_25_InvalidVerbatimTags) {
-  Node doc = Load(ex6_25);
-  // TODO: check tags (but we probably will say these are valid, I think)
-  FAIL() << "not implemented yet";
+TEST(NodeSpecTest, Ex6_25_InvalidVerbatimTags) {
+  EXPECT_THROW(Load(ex6_25), ParserException);
 }
 
 TEST(NodeSpecTest, Ex6_26_TagShorthands) {
