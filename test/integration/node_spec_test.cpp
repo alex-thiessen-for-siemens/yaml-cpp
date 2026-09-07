@@ -3,6 +3,8 @@
 
 #include "gtest/gtest.h"
 
+#include <cmath>
+
 #define EXPECT_THROW_PARSER_EXCEPTION(statement, message) \
   ASSERT_THROW(statement, ParserException);               \
   try {                                                   \
@@ -243,6 +245,16 @@ TEST(NodeSpecTest, Ex2_19_Integers) {
   EXPECT_EQ(12345, doc["decimal"].as<int>());
   EXPECT_EQ(12, doc["octal"].as<int>());
   EXPECT_EQ(12, doc["hexadecimal"].as<int>());
+}
+
+TEST(NodeSpecTest, Ex2_20_FloatingPoint) {
+  Node doc = Load(ex2_20);
+  EXPECT_DOUBLE_EQ(1230.15, doc["canonical"].as<double>());
+  EXPECT_DOUBLE_EQ(1230.15, doc["exponential"].as<double>());
+  EXPECT_DOUBLE_EQ(1230.15, doc["fixed"].as<double>());
+  EXPECT_TRUE(std::isinf(doc["negative infinity"].as<double>()));
+  EXPECT_LT(doc["negative infinity"].as<double>(), 0.0);
+  EXPECT_TRUE(std::isnan(doc["not a number"].as<double>()));
 }
 
 TEST(NodeSpecTest, Ex2_23_VariousExplicitTags) {
