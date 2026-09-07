@@ -1229,6 +1229,12 @@ TEST(NodeSpecTest, Ex10_2_SequenceExamples) {
   EXPECT_EQ("Oren Ben-Kiki", doc["Flow style"][2].as<std::string>());
 }
 
+TEST(NodeSpecTest, Ex10_3_StringExamples) {
+  Node doc = Load(ex10_3);
+  EXPECT_EQ("String: just a theory.", doc["Block style"].as<std::string>());
+  EXPECT_EQ("String: just a theory.", doc["Flow style"].as<std::string>());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
