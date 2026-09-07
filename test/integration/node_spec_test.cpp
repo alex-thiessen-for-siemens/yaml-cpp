@@ -1292,6 +1292,20 @@ TEST(NodeSpecTest, DISABLED_Ex10_8_JsonTagResolution) {
   EXPECT_EQ("+12.3", doc["Invalid"][4].as<std::string>());
 }
 
+TEST(NodeSpecTest, Ex10_9_CoreTagResolution) {
+  Node doc = Load(ex10_9);
+  EXPECT_TRUE(doc["A null"].IsNull());
+  EXPECT_TRUE(doc["Also a null"].IsNull());
+  EXPECT_EQ("", doc["Not a null"].as<std::string>());
+  EXPECT_TRUE(doc["Booleans"][0].as<bool>());
+  EXPECT_TRUE(doc["Booleans"][1].as<bool>());
+  EXPECT_FALSE(doc["Booleans"][2].as<bool>());
+  EXPECT_FALSE(doc["Booleans"][3].as<bool>());
+  EXPECT_EQ(7, doc["Integers"][1].as<int>());
+  EXPECT_EQ(58, doc["Integers"][2].as<int>());
+  EXPECT_DOUBLE_EQ(0.5, doc["Floats"][2].as<double>());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
