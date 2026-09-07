@@ -237,7 +237,13 @@ TEST(NodeSpecTest, Ex2_18_MultiLineFlowScalars) {
               "So does this quoted scalar.\n");
 }
 
-// TODO: 2.19 - 2.22 schema tags
+TEST(NodeSpecTest, Ex2_19_Integers) {
+  Node doc = Load(ex2_19);
+  EXPECT_EQ(12345, doc["canonical"].as<int>());
+  EXPECT_EQ(12345, doc["decimal"].as<int>());
+  EXPECT_EQ(12, doc["octal"].as<int>());
+  EXPECT_EQ(12, doc["hexadecimal"].as<int>());
+}
 
 TEST(NodeSpecTest, Ex2_23_VariousExplicitTags) {
   Node doc = Load(ex2_23);
