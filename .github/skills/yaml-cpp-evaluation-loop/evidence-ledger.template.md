@@ -42,6 +42,19 @@ This file belongs in private Copilot session artifacts, not in the repository.
 - Build or CI:
 - Other:
 
+## ABI compatibility
+
+- Public headers, symbols, layouts, or package boundaries affected:
+- Consumer recompilation or relinking impact:
+- ABI promise: preserved / transition authorized / not applicable:
+- Baseline release and artifact:
+- Compiler, standard library, flags, architecture, and build options:
+- `abidiff`/`abipkgdiff` version, command, and result:
+- `readelf` SONAME and exported-symbol screen:
+- Old/new header-library compatibility probes:
+- Required SOVERSION or packaging action:
+- Missing tools, platform limitations, or unresolved risks:
+
 ## Tool decisions
 
 | Tool/check | Version | Installed | User decision | Coverage or reason |

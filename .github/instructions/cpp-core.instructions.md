@@ -4,8 +4,12 @@ applyTo: "src/**/*,include/**/*,**/*.h,**/*.hpp,**/*.cc,**/*.cpp,**/*.cxx"
 
 For C++ changes, preserve C++11 compilation unless the task explicitly changes
 the supported standard. Follow the root `.clang-format` and nearby naming and
-layout. Keep public headers self-contained and avoid adding dependencies or
-symbols that change ABI without a deliberate compatibility decision.
+layout. Keep public headers self-contained and avoid adding dependencies,
+public layout changes, or symbols that change ABI without a deliberate
+compatibility decision. For public-header, exported-symbol, or
+inline-implementation changes, and for CMake versioning changes, use
+`/yaml-cpp-abi-analysis` and record whether the ABI is preserved, intentionally
+transitioned, or not applicable.
 
 Trace ownership from creation through destruction. Prefer the ownership
 patterns already used in this repository and make the owner and lifetime

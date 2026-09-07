@@ -1,0 +1,424 @@
+= yaml-cpp ABI stability and compatibility
+:toc:
+:sectnums:
+
+== Executive summary
+
+yaml-cpp has two different compatibility surfaces:
+
+* Public headers contain substantial inline implementation. Changes to those
+  headers can require consumers to recompile even when the shared-library ABI
+  is unchanged.
+* Shared-library compatibility is tracked indirectly by CMake's SONAME. The
+  current rule sets the SONAME to
+  `${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}`. A minor-line release
+  therefore receives a new SONAME, while a patch release keeps the previous
+  one.
+
+The SONAME rule is predictable, but it has not always matched the real ABI.
+The 0.6.2 to 0.6.3 transition retained `libyaml-cpp.so.0.6` while changing
+exported symbols in incompatible ways. Conversely, the 0.7.0 to 0.8.0
+transition changed the SONAME even though the controlled exported-symbol
+screening found no additions or removals. The available evidence therefore
+does not support treating a version number or SONAME as a complete ABI
+compatibility test.
+
+ABI changes are not deliberately batched. They accumulate during long,
+irregular release intervals and are handled reactively when a downstream
+breakage is reported. The most valuable first improvement is an ABI
+compatibility gate tied to an explicit ABI-versioning policy. Longer-term
+work should reduce the public header and object-layout surface.
+
+This document is a research result. It does not change the yaml-cpp source
+implementation.
+
+== Terminology
+
+* *Source compatibility* means that a consumer can compile against the new
+  headers without source changes.
+* *Header recompilation* means rebuilding consumer translation units that
+  include a changed header. This can be required even when old binaries can
+  continue to use the shared library.
+* *Binary compatibility* or *ABI compatibility* means that already-compiled
+  consumer objects can continue to link and run with the new shared library.
+* *SONAME* is the ABI identity used by ELF dynamic linkers and distributions.
+  A SONAME change normally causes dependent packages to be rebuilt or
+  relinked, although an old binary can continue to run if the old SONAME
+  remains installed.
+
+These are related but not interchangeable. A SONAME bump is a declaration
+that incompatible binaries must not use the new library. It is not proof that
+the old and new interfaces differ. An unchanged SONAME is not proof that
+they are compatible.
+
+== Current versioning policy
+
+The relevant CMake configuration is in `CMakeLists.txt`:
+
+[source,cmake]
+----
+project(YAML_CPP VERSION 0.9.0 LANGUAGES CXX)
+
+set_target_properties(yaml-cpp PROPERTIES
+  VERSION "${PROJECT_VERSION}"
+  SOVERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
+  ...)
+----
+
+The consequence is:
+
+[cols="1,1,1"]
+|===
+| Release | SONAME | Expected downstream consequence
+
+| `0.6.2`, `0.6.3`
+| `libyaml-cpp.so.0.6`
+| No SONAME transition. ABI breaks are still possible.
+
+| `0.7.0`
+| `libyaml-cpp.so.0.7`
+| SONAME transition; dependent shared-library packages must be rebuilt.
+
+| `0.8.0`
+| `libyaml-cpp.so.0.8`
+| SONAME transition, even though no ABI break was found in the screening
+  described below.
+
+| `0.9.0`
+| `libyaml-cpp.so.0.9`
+| SONAME transition and an observable exported-symbol-set change.
+|===
+
+There is no separate `YAML_CPP_ABI_VERSION` or reviewed SOVERSION value in
+the current build system. The package version and the ABI version are
+implicitly coupled.
+
+== How often users are forced to rebuild
+
+=== Release cadence
+
+The repository contains 20 distinct versioned releases from 0.2.0 through
+0.9.0. There is also an alias tag for 0.5.3. The recent minor-line intervals
+are:
+
+[cols="1,1,1,1"]
+|===
+| Transition | Release dates | Days | Approximate interval
+
+| `0.5.3` -> `0.6.0`
+| 2016-01-10 -> 2018-01-28
+| 749
+| 2.05 years
+
+| `0.6.3` -> `0.7.0`
+| 2019-09-25 -> 2021-07-10
+| 654
+| 1.79 years
+
+| `0.7.0` -> `0.8.0`
+| 2021-07-10 -> 2023-08-10
+| 761
+| 2.08 years
+
+| `0.8.0` -> `0.9.0`
+| 2023-08-10 -> 2026-02-04
+| 909
+| 2.49 years
+|===
+
+Under the current policy, a distribution should expect a SONAME-driven
+dependency rebuild approximately every 1.8 to 2.5 years in the recent
+history. That is a release-event frequency, not a measured frequency of
+actual incompatible interfaces.
+
+The older history was more active: 0.2.x had several releases in 2009 and
+2010, while 0.5.1 to 0.5.2 took 715 days. The project has therefore never
+had a fixed annual ABI cadence.
+
+=== Header-driven recompilation
+
+The public header surface makes source recompilation more common than SONAME
+changes suggest. `yaml-cpp/yaml.h` exports:
+
+* `yaml-cpp/node/impl.h`;
+* `yaml-cpp/node/detail/impl.h`;
+* conversion and iterator headers; and
+* inline emitter overloads.
+
+`Node` operations and conversion code are consequently compiled into
+consumer translation units. A change to an inline body, declaration,
+template, enum, class layout, or included detail header can require
+recompilation even if the shared library retains the same SONAME.
+
+Static-library users have an additional distinction: replacing the archive
+requires at least relinking the application, while changed headers require
+recompiling affected translation units. A library release alone does not
+tell a user which of those operations is sufficient.
+
+=== Measured ABI transitions
+
+The following screening used temporary checkouts of tags 0.6.2, 0.6.3,
+0.7.0, 0.8.0, and 0.9.0. Each was built as a shared library with the same
+host GCC 14 toolchain. `readelf -d` recorded the SONAME, and
+`nm -D --defined-only --demangle` produced sorted exported-symbol lists.
+The old tag CMake minimums were adjusted only in the temporary copies so
+that current CMake could configure them.
+
+[cols="1,1,1,2"]
+|===
+| Transition | SONAME result | Symbol-screen result | Interpretation
+
+| `0.6.2` -> `0.6.3`
+| `0.6` -> `0.6`
+| `node_data::empty_scalar` changed from a data symbol to
+  `empty_scalar()`. `RegEx::operator&&` and `operator&#124;` were replaced by
+  `operator&` and `operator&#124;`.
+| A concrete patch-release ABI break with no SONAME change.
+
+| `0.6.3` -> `0.7.0`
+| `0.6` -> `0.7`
+| Multiple exported signatures changed, including `memory_holder` methods
+  changing from shared-pointer-by-value to const-reference parameters and
+  changed exception constructors.
+| SONAME bump accompanied an ABI transition.
+
+| `0.7.0` -> `0.8.0`
+| `0.7` -> `0.8`
+| No exported-symbol additions or removals in this screening.
+| SONAME bump without a detected symbol-set break.
+
+| `0.8.0` -> `0.9.0`
+| `0.8` -> `0.9`
+| Emitter string-writing and floating-point-formatting symbols changed;
+  the exported symbol set was not identical.
+| SONAME bump accompanied observable ABI-surface change.
+|===
+
+The first row corresponds to the `empty_scalar` problem discussed in
+https://github.com/jbeder/yaml-cpp/issues/789[upstream issue 789]. The
+`RegEx` change is documented in
+https://github.com/jbeder/yaml-cpp/issues/835[upstream issue 835].
+
+This is a symbol-level screening, not a complete compatibility proof. It
+does not fully detect class-layout changes, calling-convention differences,
+inline behavior, data-type compatibility, or platform-specific DLL ABI
+issues. `abidiff`/`abipkgdiff` was not installed for this study. The
+screening should therefore be treated as strong evidence for the named
+symbol changes and as a reason to add a proper libabigail gate, not as a
+replacement for one.
+
+=== Lower bound and uncertainty
+
+The evidence establishes at least one real ABI break in a patch release
+within the sampled history and at least one SONAME bump without a detected
+symbol-set change. It does not establish an exact ABI-break probability for
+every release:
+
+* the project does not retain a checked ABI baseline in the repository;
+* the full supported compiler and platform matrix was not compared;
+* symbol presence does not cover all layout and inline compatibility
+  properties; and
+* not every historical tag was rebuilt and analyzed with libabigail.
+
+The defensible conclusion is therefore qualitative: users face predictable
+SONAME transitions on minor releases, but accidental ABI breaks can occur
+between them, including in patch releases.
+
+== Are ABI changes batched?
+
+=== Repository policy
+
+The current `CONTRIBUTING.md`, `.github/`, and `CMakeLists.txt` contain no
+ABI policy, ABI baseline, SOVERSION review procedure, or ABI CI gate. The
+contribution guide describes formatting, tests, imperative commit messages,
+and review, but it does not require ABI analysis for public-header or
+exported-symbol changes.
+
+=== Historical behavior
+
+The evidence points to opportunistic changes rather than intentional ABI
+windows:
+
+* Commit `774f258` changed `empty_scalar` while fixing DLL support. The
+  resulting break was later reported against 0.6.3.
+* Commit `0d5c571` changed exported `RegEx` operators as part of warning and
+  style cleanup. It was not presented as an ABI transition.
+* The 2021 symbol-visibility work was introduced and then repeatedly
+  reverted or reintroduced in separate commits. That history shows the
+  difficulty of changing the export boundary without a compatibility plan.
+* Upstream issue
+  https://github.com/jbeder/yaml-cpp/issues/1102[1102] proposed reverting
+  an ABI break after downstream users had already adapted. The discussion
+  illustrates reactive coordination rather than a pre-release ABI window.
+
+The long gaps between releases accidentally batch many source changes into a
+single tag. They do not batch ABI decisions: an ABI-sensitive commit can
+land at any time, and a patch release can retain the old SONAME even when
+compatibility has been lost.
+
+=== Downstream feedback
+
+* In issue 789, the maintainer acknowledged that the higher version should
+  have been bumped after the `empty_scalar` break.
+* In issue 835, the `RegEx` break was described as an inconsistency and the
+  issue was closed after the break had shipped.
+* In
+  https://github.com/jbeder/yaml-cpp/issues/1317[issue 1317], Fedora
+  reported that the 0.8.0 SONAME change caused many dependent packages to be
+  rebuilt even though `abipkgdiff` found no ABI changes. A collaborator
+  acknowledged that repeated downstream rebuilds were undesirable and
+  suggested an ABI check, but also described distribution ABI checking as
+  outside the project's normal maintenance scope. The issue remains open.
+
+These discussions are consistent with a maintenance model in which ABI
+compatibility is handled when a concrete downstream problem appears, not
+with a planned batching policy.
+
+== Why the current code is vulnerable to future ABI drift
+
+=== Exposed object layouts
+
+Several exported classes contain implementation state or STL containers:
+
+* `Binary` contains a `std::vector<unsigned char>`, an unowned pointer, and
+  size state.
+* `ostream_wrapper` contains a `std::vector<char>`, an `std::ostream` pointer,
+  position counters, and flags.
+* `Node` contains `std::string` state and shared ownership handles. The
+  `Node` representation is part of the public class layout even though those
+  members are private.
+* `node_data` and related `detail` types expose additional vectors, lists,
+  maps, and node relationships through installed headers.
+
+Changing any of these members can change `sizeof`, alignment, offsets,
+constructor/destructor behavior, and the code generated by consumers.
+Standard-library types also make cross-compiler and runtime-library
+compatibility more difficult, especially for Windows DLL consumers. This is
+the concern raised in
+https://github.com/jbeder/yaml-cpp/issues/642[issue 642].
+
+As a local example, the separate experimental branch
+`fork/experiment/node-shared-handle` replaces `YAML::Node`'s raw internal
+node pointer with an aliasing `std::shared_ptr`. It makes a defaulted move
+constructor safe, but expands the object layout and is intentionally not an
+upstream-compatible change. That experiment demonstrates why private
+implementation ownership decisions are ABI decisions when the representation
+is embedded in a public value type.
+
+=== Inline implementation and detail headers
+
+`yaml.h` deliberately exports implementation headers to support the current
+header-based design. This improves inlining and keeps templates convenient,
+but it also means that consumers compile against internal types and
+representations. The `YAML_CPP_API` annotation controls exported symbols; it
+does not make an exposed C++ class layout opaque.
+
+The visibility history also shows a risk boundary. Commit `da1c8d3` attempted
+to hide non-public symbols by default, while later commits reverted and
+reintroduced parts of that change. The current explicit export macros are
+useful, but symbol visibility alone cannot repair an ABI break in a public
+class or an inline function.
+
+== Recommendations
+
+The following order minimizes risk while improving future decisions.
+
+=== 1. Add an ABI compatibility gate
+
+Build the last released ABI baseline and the candidate with a documented
+compiler, standard library, build type, shared-library option, and public
+feature set. Run libabigail `abidiff` or `abipkgdiff` and make the result a
+required check for changes to public headers, exported symbols, or CMake
+versioning.
+
+The gate should:
+
+* report incompatible changes separately from compatible additions;
+* preserve the baseline artifact for each supported ABI platform;
+* fail by default on removed symbols, changed signatures, and layout changes;
+* require an explicit ABI-transition decision to accept an incompatible
+  result; and
+* record the required SONAME change in the same decision.
+
+An exported-symbol list is useful as a fast diagnostic, but it should not be
+the only gate.
+
+=== 2. Separate package version from ABI version
+
+Introduce a reviewed `YAML_CPP_ABI_VERSION` or `YAML_CPP_SOVERSION` in
+CMake. Keep patch and feature releases free to advance the package version
+without automatically changing the SONAME when compatibility is preserved.
+Conversely, require an ABI bump whenever the compatibility gate detects an
+incompatible change, even if the package change is described as a patch.
+
+This policy must not become a way to keep an old SONAME after an ABI break.
+The purpose is to prevent unnecessary rebuilds while making necessary
+rebuilds explicit.
+
+=== 3. Reduce the installed ABI surface
+
+Move implementation-only `node/detail/*` headers to `src` where possible and
+stop re-exporting them from `yaml.h`. If legacy include paths must remain,
+provide compatibility forwarding headers without exposing new internal
+types. Document which headers and classes are supported public API.
+
+Keep only required API symbols visible by default on ELF and Windows. Avoid
+exporting whole implementation classes when exporting their supported
+functions is sufficient. This reduces accidental dependencies on `detail`
+symbols and makes ABI reports more meaningful.
+
+=== 4. Stabilize public object layouts
+
+Use an opaque implementation object, usually a Pimpl, for classes whose
+state changes frequently. `Node`, `Emitter`, `Binary`, and
+`ostream_wrapper` are candidates, but each redesign has a cost:
+
+* an allocation or indirection may affect performance;
+* ownership and allocator rules must be explicit;
+* copy and move semantics must be preserved; and
+* the transition itself is ABI-breaking unless introduced behind a new ABI
+  generation or a compatibility bridge.
+
+Pimpl should therefore follow the ABI gate and policy work, not precede it
+as an isolated large refactor.
+
+=== 5. Reduce inline coupling
+
+Keep templates and genuinely trivial, performance-critical wrappers inline.
+Move ordinary non-template behavior to `.cpp` files so implementation changes
+do not force every consumer to recompile and do not embed internal
+assumptions into application objects.
+
+=== 6. Preserve compatibility where practical
+
+For removed exported functions, retain deprecated forwarding symbols for at
+least one ABI generation when the old implementation can be supported.
+ELF symbol versioning can help with selected function-level transitions, but
+it cannot solve class-layout changes, inline code, or incompatible standard
+library types.
+
+Add compatibility probes that:
+
+* compile with old headers and link against the new library;
+* compile with new headers and link against the old library where promised;
+* exercise exported classes across the library boundary; and
+* run on the supported Windows runtime configurations as well as ELF.
+
+== Practical conclusion
+
+For users, the safe operational rule is to treat each yaml-cpp minor release
+as a possible shared-library ABI transition and each public-header change as
+a possible recompilation event. Do not assume that a patch release is ABI
+safe solely because its SONAME is unchanged.
+
+For maintainers, the best near-term sequence is:
+
+. Add an ABI baseline and libabigail CI check.
+. Adopt an explicit ABI-version/SOVERSION review rule.
+. Reduce accidental exports and detail-header exposure.
+. Plan any Pimpl or public-layout redesign as a versioned compatibility
+  transition.
+
+That sequence addresses both observed failure modes: unnecessary downstream
+rebuilds when the ABI is unchanged, and runtime/link failures when the ABI
+changes without a corresponding SONAME transition.

@@ -8,7 +8,10 @@ commit. Confirm:
 
 * the request, root cause, invariant, and behavior change are clear;
 * production edits are narrow and preserve C++11, public API/ABI, exception,
-  ownership, and platform contracts;
+  ownership, and platform contracts. For public headers, exported symbols or
+  classes, inline implementations, visibility, package boundaries, and
+  `SOVERSION`, require the `/yaml-cpp-abi-analysis` conclusion and verify
+  that any ABI transition is explicitly authorized;
 * the owning existing suite contains a test that prevents regressions and
   covers the changed boundary plus nearby valid behavior;
 * YAML-observable behavior changes have local-reference evidence in the
@@ -26,6 +29,9 @@ commit. Confirm:
   `Co-authored-by` trailer; run the commit checker in upstream mode;
 * CMake source lists, Bazel targets or globs, installation, package checks,
   and CI implications were considered when relevant;
+* shared-library baselines, SONAMEs, class layouts, and old/new
+  header-library compatibility probes were considered for ABI-sensitive
+  changes. Missing ABI tooling is recorded as a limitation, never as a pass;
 * `git diff --check` passes, changed C++ files match `.clang-format`, and the
   evaluation ledger contains exact commands, results, user waivers, and
   remaining platform limitations. If host tools were missing or incompatible,

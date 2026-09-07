@@ -22,11 +22,14 @@ Work in this order:
    and implementation hypothesis in the ledger.
 2. Inspect accepted upstream examples with comparable risk. Decide the
    smallest production and test change that can fix the root cause.
-3. Implement the change and a test that prevents regressions. Keep C++11,
-   API/ABI, exception, ownership, and platform behavior explicit. Do not add
-   unrelated cleanup or generated documentation. Preserve pre-existing lines
-   outside the planned hunks, including lines in files that the contribution
-   touches.
+3. For public headers, exported symbols or classes, inline implementations,
+   installed include paths, visibility, package boundaries, or `SOVERSION`,
+   invoke `/yaml-cpp-abi-analysis` and record its conclusion before editing.
+   Implement the change and a test that prevents regressions. Keep C++11,
+   API/ABI, exception, ownership, and platform behavior explicit.
+   Do not add unrelated cleanup or generated documentation. Preserve
+   pre-existing lines outside the planned hunks, including lines in files that
+   the contribution touches.
 4. If the behavior is observable through YAML syntax, tags, schemas,
    serialization, or public conversion, invoke `/yaml-cpp-reference-check`
    with a private fixture and local adapters before the broad evaluator.
@@ -38,7 +41,9 @@ Work in this order:
    evidence because libyaml does not construct resolved values.
    Prefer the latest stable matching releases available locally, recording
    the latest known release and any freshness waiver.
-5. Use `/yaml-cpp-evaluation-loop`. Inventory tools before running the
+5. Use `/yaml-cpp-evaluation-loop`. For ABI-sensitive changes, complete the
+   ABI baseline and SONAME decision before treating the broad evaluator as
+   sufficient. Inventory tools before running the
    maximum local checks. If a useful host tool is missing or too old, prefer
    the Docker evaluator before requesting a privileged host install. If Docker
    is unavailable, ask the user whether to install it or waive container

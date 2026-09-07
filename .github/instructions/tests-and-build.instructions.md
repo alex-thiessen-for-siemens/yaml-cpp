@@ -31,6 +31,9 @@ globs or targets, installation and package tests, and include dependencies.
 Preserve the CMake 3.15 minimum and C++11 build. Consider static and shared
 libraries, system and embedded GoogleTest, Windows runtime choices, and the
 platforms in `.github/workflows/build.yml`.
+For public-header, exported-symbol, class-layout, visibility, or
+`SOVERSION` changes, also run `/yaml-cpp-abi-analysis`; record the baseline,
+tool version, SONAME result, ABI result, and any platform limitations.
 
 Run the smallest relevant target first. Then use the evaluation skill for the
 full local evidence selected for the contribution. Report unavailable tools

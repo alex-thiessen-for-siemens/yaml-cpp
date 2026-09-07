@@ -26,22 +26,27 @@ Use this loop after intake and after each material repair:
    retain a matching semantic implementation as a separate comparison. A
    mismatch is a failure. If no matching local implementation exists, record
    the explicit limitation and do not call the behavior reference-verified.
-4. Run the smallest relevant CMake test and formatting check first. Then run
+4. For public-header, exported-symbol, class-layout, visibility, installed
+   include-path, package, or `SOVERSION` changes, run
+   `/yaml-cpp-abi-analysis` before the broad evaluator. A missing libabigail
+   tool is an explicit coverage limitation, not a pass; use the symbol and
+   SONAME screen only as incomplete diagnostic evidence.
+5. Run the smallest relevant CMake test and formatting check first. Then run
    `run-evaluation.sh` on the host or the container runner with the selected
    waivers. Both evaluators use isolated build directories and never change
    source files. Formatting and clang-tidy are scoped to changed C++ line
    ranges, and cppcheck diagnostics are compared with those ranges, so a
    pre-existing finding on an untouched line must not force unrelated cleanup.
    A finding in a changed range remains a failure.
-5. Diagnose the first concrete failure. Inspect its output and affected code,
+6. Diagnose the first concrete failure. Inspect its output and affected code,
    make one focused repair, and rerun the affected phase. Do not rewrite a
    passing area or restart all model reasoning for an unrelated failure. If
    the failure was introduced by the feature, keep the repair in the existing
    feature commit or logical series; use amend or fixup/autosquash rather than
    adding a correction-only commit.
-6. After deterministic checks pass, run bounded safety and acceptance reviews.
+7. After deterministic checks pass, run bounded safety and acceptance reviews.
    Repair only concrete blockers and rerun the affected checks.
-7. Before upstream readiness, inspect the complete feature history. Fold
+8. Before upstream readiness, inspect the complete feature history. Fold
    review repairs caused by the feature into the relevant commit or series,
    then rerun affected checks. If a reference comparison passed, require a
    `Reference verification:` block in the feature commit body with every

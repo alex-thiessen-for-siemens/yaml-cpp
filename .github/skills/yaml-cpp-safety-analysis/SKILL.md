@@ -19,7 +19,10 @@ Check:
 * scanner, parser, emitter, and indentation-stack invariants across normal,
   repeated, empty, EOF, malformed, and exception paths;
 * public-header self-containment, exception destructors, `noexcept`, ABI
-  visibility, iterator traits, and C++11 compilation;
+  visibility, iterator traits, and C++11 compilation. For public layout,
+  exported-symbol, visibility, package, or `SOVERSION` changes, also use
+  `/yaml-cpp-abi-analysis` to distinguish an ABI defect from an authorized
+  transition;
 * static and shared library behavior, package installation, Bazel consumers,
   and tests that exercise the changed public behavior.
 

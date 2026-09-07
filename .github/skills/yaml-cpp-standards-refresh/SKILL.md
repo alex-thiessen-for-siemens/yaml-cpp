@@ -25,7 +25,9 @@ for a meaningful release cycle. Do not refresh from model intuition.
    dependency. Recheck libyaml's parser/emitter scope separately and do not
    promote it to a constructor oracle. Refresh the latest stable release
    recorded for each selected reference library and require exact versions in
-   future reference-verification commit bodies.
+   future reference-verification commit bodies. Also refresh the ABI baseline,
+   `SOVERSION` policy, supported symbol visibility, and any libabigail tool
+   versions; do not infer ABI safety from SONAME changes alone.
 4. Run the host inventory and the container evaluator. If Docker is missing or
    its daemon is unavailable, ask the user to install or waive container
    coverage. Use QEMU only when Docker Buildx exposes the target platform with

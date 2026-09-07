@@ -36,6 +36,12 @@ edit the first plausible file.
    eventual commit body when the comparison is applicable.
    If the request is genuinely ambiguous or would cause destructive changes,
    ask the user. Otherwise choose the least surprising behavior and proceed.
+7. For any public header, exported symbol or class, inline implementation,
+   installed include path, visibility macro, package boundary, or
+   `SOVERSION` change, invoke `/yaml-cpp-abi-analysis`. Record whether the
+   change requires consumer recompilation, relinking, or an ABI transition;
+   identify the last released baseline; and state the required SONAME and
+   platform checks. Do not assume an unchanged SONAME proves compatibility.
 
 The intake is complete only when another engineer could use the ledger to
 understand why the proposed files and test are the right scope.

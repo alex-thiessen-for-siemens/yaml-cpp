@@ -29,7 +29,9 @@ Check that the change:
   tool, not a co-author, so upstream feature commits contain no AI
   `Co-authored-by` trailer. Confirm this with the checker in upstream mode;
 * preserves C++11, public API/ABI, exception, ownership, package, and platform
-  contracts;
+  contracts. For ABI-sensitive changes, require the
+  `/yaml-cpp-abi-analysis` conclusion, a named baseline, SONAME decision,
+  and explicit treatment of missing libabigail or platform coverage;
 * updates CMake, Bazel, installation, or CI only when the change requires it;
 * passes `git diff --check`, formatting, and the recorded evaluation gates;
   if the host lacks a compatible gate, confirm that the pinned Docker

@@ -10,7 +10,9 @@ modify files, generate a replacement patch, or review vendored GoogleTest.
 Keep the context bounded and return a short report with file and line
 evidence.
 
-Use `/yaml-cpp-safety-analysis`. Attack the assumptions most likely to hide a
+Use `/yaml-cpp-safety-analysis` and, for public-header, exported-symbol,
+class-layout, visibility, or `SOVERSION` changes,
+`/yaml-cpp-abi-analysis`. Attack the assumptions most likely to hide a
 real defect: ownership and destruction order, empty containers, bounds and
 overflow, signed conversions, character classification, stream flags and
 partial reads, dangling iterators or proxy values, parser/emitter state

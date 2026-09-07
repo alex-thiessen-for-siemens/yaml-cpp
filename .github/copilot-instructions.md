@@ -6,9 +6,13 @@ inspect the relevant implementation, its owning tests, nearby invariants, and
 recent history. Do not guess from filenames or from an issue title alone.
 
 Preserve the public API, ABI, C++11 support, exception contracts, and the
-platform behavior covered by the project. Prefer the smallest change that
-fixes the root cause. Do not mix drive-by cleanup, formatting-only changes,
-documentation generation, or dependency updates into a code contribution.
+platform behavior covered by the project. Treat public headers, exported
+symbols or classes, inline implementations, installed include paths, and
+CMake `SOVERSION` changes as ABI-sensitive; use
+`/yaml-cpp-abi-analysis` before editing and before publication. Prefer the
+smallest change that fixes the root cause. Do not mix drive-by cleanup,
+formatting-only changes, documentation generation, or dependency updates into
+a code contribution.
 Never modify vendored GoogleTest unless the task explicitly requires it.
 Scope is hunk-level, not merely file-level: record the intended files and
 behavioral hunks before editing, then inspect the complete diff after every
