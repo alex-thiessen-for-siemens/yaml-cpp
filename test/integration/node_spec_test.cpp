@@ -1212,6 +1212,14 @@ TEST(NodeSpecTest, Ex9_6_Stream) {
   EXPECT_EQ(20, docs[2]["matches %"].as<int>());
 }
 
+TEST(NodeSpecTest, Ex10_1_MapExamples) {
+  Node doc = Load(ex10_1);
+  EXPECT_EQ(2u, doc.size());
+  EXPECT_EQ("Evans", doc["Block style"]["Clark"].as<std::string>());
+  EXPECT_EQ("döt Net", doc["Block style"]["Ingy"].as<std::string>());
+  EXPECT_EQ("Ben-Kiki", doc["Flow style"]["Oren"].as<std::string>());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
