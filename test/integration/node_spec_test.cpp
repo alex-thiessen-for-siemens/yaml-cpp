@@ -1278,6 +1278,20 @@ TEST(NodeSpecTest, Ex10_7_FloatingPointExamples) {
   EXPECT_TRUE(std::isnan(doc["not a number"].as<double>()));
 }
 
+TEST(NodeSpecTest, DISABLED_Ex10_8_JsonTagResolution) {
+  // SPEC_GAP: yaml-cpp uses the YAML 1.1-compatible resolver for several
+  // values that YAML 1.2 JSON resolution leaves as strings.
+  Node doc = Load(ex10_8);
+  EXPECT_TRUE(doc["A null"].IsNull());
+  EXPECT_TRUE(doc["Booleans"][0].as<bool>());
+  EXPECT_FALSE(doc["Booleans"][1].as<bool>());
+  EXPECT_EQ("True", doc["Invalid"][0].as<std::string>());
+  EXPECT_EQ("Null", doc["Invalid"][1].as<std::string>());
+  EXPECT_EQ("0o7", doc["Invalid"][2].as<std::string>());
+  EXPECT_EQ("0x3A", doc["Invalid"][3].as<std::string>());
+  EXPECT_EQ("+12.3", doc["Invalid"][4].as<std::string>());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
