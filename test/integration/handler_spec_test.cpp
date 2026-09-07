@@ -1875,9 +1875,7 @@ TEST_F(HandlerSpecTest, Ex10_7_FloatingPointExamples) {
   Parse(ex10_7);
 }
 
-TEST_F(HandlerSpecTest, DISABLED_Ex10_8_JsonTagResolution) {
-  // SPEC_GAP: yaml-cpp emits "Null" as an implicit null event, while the
-  // YAML 1.2 JSON schema requires that value to remain a string scalar.
+TEST_F(HandlerSpecTest, Ex10_8_JsonTagResolution) {
   EXPECT_CALL(handler, OnDocumentStart(_));
   EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
   EXPECT_CALL(handler, OnScalar(_, "?", 0, "A null"));

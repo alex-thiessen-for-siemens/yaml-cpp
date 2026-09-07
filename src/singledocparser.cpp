@@ -14,6 +14,12 @@
 #include "yaml-cpp/null.h"
 
 namespace YAML {
+namespace {
+bool IsNullToken(const std::string& val) {
+  return val.empty() || val == "~" || val == "null";
+}
+}  // namespace
+
 SingleDocParser::SingleDocParser(Scanner& scanner, const Directives& directives)
     : m_scanner(scanner),
       m_directives(directives),
@@ -98,8 +104,8 @@ void SingleDocParser::HandleNode(EventHandler& eventHandler) {
   if (tag.empty())
     tag = (token.type == Token::NON_PLAIN_SCALAR ? "!" : "?");
 
-  if (token.type == Token::PLAIN_SCALAR
-      && tag == "?" && IsNullString(token.value.data(), token.value.size())) {
+  if (token.type == Token::PLAIN_SCALAR && tag == "?" &&
+      IsNullToken(token.value)) {
     eventHandler.OnNull(mark, anchor);
     m_scanner.pop();
     return;

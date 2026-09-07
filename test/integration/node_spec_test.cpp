@@ -1270,9 +1270,7 @@ TEST(NodeSpecTest, Ex10_7_FloatingPointExamples) {
   EXPECT_TRUE(std::isnan(doc["not a number"].as<double>()));
 }
 
-TEST(NodeSpecTest, DISABLED_Ex10_8_JsonTagResolution) {
-  // SPEC_GAP: yaml-cpp uses the YAML 1.1-compatible resolver for several
-  // values that YAML 1.2 JSON resolution leaves as strings.
+TEST(NodeSpecTest, Ex10_8_JsonTagResolution) {
   Node doc = Load(ex10_8);
   EXPECT_TRUE(doc["A null"].IsNull());
   EXPECT_TRUE(doc["Booleans"][0].as<bool>());
