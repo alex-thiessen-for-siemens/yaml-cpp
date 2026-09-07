@@ -1203,6 +1203,15 @@ TEST(NodeSpecTest, DISABLED_Ex9_5_DirectivesDocuments) {
   EXPECT_TRUE(docs[1].IsNull());
 }
 
+TEST(NodeSpecTest, Ex9_6_Stream) {
+  std::vector<Node> docs = LoadAll(ex9_6);
+  ASSERT_EQ(3u, docs.size());
+  EXPECT_EQ("Document", docs[0].as<std::string>());
+  EXPECT_TRUE(docs[1].IsNull());
+  ASSERT_EQ(1u, docs[2].size());
+  EXPECT_EQ(20, docs[2]["matches %"].as<int>());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
