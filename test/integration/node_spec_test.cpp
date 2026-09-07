@@ -1220,6 +1220,15 @@ TEST(NodeSpecTest, Ex10_1_MapExamples) {
   EXPECT_EQ("Ben-Kiki", doc["Flow style"]["Oren"].as<std::string>());
 }
 
+TEST(NodeSpecTest, Ex10_2_SequenceExamples) {
+  Node doc = Load(ex10_2);
+  EXPECT_EQ(2u, doc.size());
+  ASSERT_EQ(3u, doc["Block style"].size());
+  EXPECT_EQ("Clark Evans", doc["Block style"][0].as<std::string>());
+  EXPECT_EQ("Ingy döt Net", doc["Block style"][1].as<std::string>());
+  EXPECT_EQ("Oren Ben-Kiki", doc["Flow style"][2].as<std::string>());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
