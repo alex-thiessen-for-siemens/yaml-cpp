@@ -265,6 +265,14 @@ TEST(NodeSpecTest, Ex2_21_Miscellaneous) {
   EXPECT_EQ("012345", doc["string"].as<std::string>());
 }
 
+TEST(NodeSpecTest, Ex2_22_Timestamps) {
+  Node doc = Load(ex2_22);
+  EXPECT_EQ("2001-12-15T02:59:43.1Z", doc["canonical"].as<std::string>());
+  EXPECT_EQ("2001-12-14t21:59:43.10-05:00", doc["iso8601"].as<std::string>());
+  EXPECT_EQ("2001-12-14 21:59:43.10 -5", doc["spaced"].as<std::string>());
+  EXPECT_EQ("2002-12-14", doc["date"].as<std::string>());
+}
+
 TEST(NodeSpecTest, Ex2_23_VariousExplicitTags) {
   Node doc = Load(ex2_23);
   EXPECT_EQ(3, doc.size());
