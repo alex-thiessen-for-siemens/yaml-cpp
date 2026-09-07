@@ -1731,5 +1731,17 @@ TEST_F(HandlerSpecTest, DISABLED_Ex9_4_ExplicitDocuments) {
   Parse(ex9_4);
 }
 
+TEST_F(HandlerSpecTest, DISABLED_Ex9_5_DirectivesDocuments) {
+  // SPEC_GAP: yaml-cpp rejects a directive document containing this literal
+  // block scalar.
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnScalar(_, "!", 0, "%!PS-Adobe-2.0\n"));
+  EXPECT_CALL(handler, OnDocumentEnd());
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnNull(_, 0));
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex9_5);
+}
+
 }  // namespace
 }  // namespace YAML

@@ -907,4 +907,14 @@ const char *ex9_4 =
     "# Empty\n"
     "...";
 
+const char *ex9_5 =
+    "%YAML 1.2\n"
+    "--- |\n"
+    "%!PS-Adobe-2.0\n"
+    "...\n"
+    "%YAML 1.2\n"
+    "---\n"
+    "# Empty\n"
+    "...";
+
 }
