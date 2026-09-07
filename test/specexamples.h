@@ -889,4 +889,13 @@ const char *ex9_2 =
     "Document\n"
     "... # Suffix";
 
+const char *ex9_3 =
+    "Bare\n"
+    "document\n"
+    "...\n"
+    "# No document\n"
+    "...\n"
+    "|\n"
+    "%!PS-Adobe-2.0 # Not the first line";
+
 }
