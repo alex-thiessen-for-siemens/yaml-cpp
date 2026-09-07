@@ -898,4 +898,13 @@ const char *ex9_3 =
     "|\n"
     "%!PS-Adobe-2.0 # Not the first line";
 
+const char *ex9_4 =
+    "---\n"
+    "{ matches\n"
+    "% : 20 }\n"
+    "...\n"
+    "---\n"
+    "# Empty\n"
+    "...";
+
 }
