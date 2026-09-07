@@ -1717,5 +1717,19 @@ TEST_F(HandlerSpecTest, DISABLED_Ex9_3_BareDocuments) {
   Parse(ex9_3);
 }
 
+TEST_F(HandlerSpecTest, DISABLED_Ex9_4_ExplicitDocuments) {
+  // SPEC_GAP: yaml-cpp rejects the percent character in this flow key.
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "matches %"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "20"));
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnNull(_, 0));
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex9_4);
+}
+
 }  // namespace
 }  // namespace YAML
