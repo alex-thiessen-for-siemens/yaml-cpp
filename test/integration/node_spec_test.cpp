@@ -1261,6 +1261,13 @@ TEST(NodeSpecTest, Ex10_5_BooleanExamples) {
   EXPECT_FALSE(doc["Pluto is a planet"].as<bool>());
 }
 
+TEST(NodeSpecTest, Ex10_6_IntegerExamples) {
+  Node doc = Load(ex10_6);
+  EXPECT_EQ(-12, doc["negative"].as<int>());
+  EXPECT_EQ(0, doc["zero"].as<int>());
+  EXPECT_EQ(34, doc["positive"].as<int>());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
