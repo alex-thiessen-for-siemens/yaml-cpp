@@ -1235,6 +1235,26 @@ TEST(NodeSpecTest, Ex10_3_StringExamples) {
   EXPECT_EQ("String: just a theory.", doc["Flow style"].as<std::string>());
 }
 
+TEST(NodeSpecTest, Ex10_4_NullExamples) {
+  Node doc = Load(ex10_4);
+  ASSERT_EQ(2u, doc.size());
+  bool found_null_key = false;
+  bool found_null_value = false;
+  for (Node::const_iterator it = doc.begin(); it != doc.end(); ++it) {
+    if (it->first.Tag() == "tag:yaml.org,2002:null") {
+      found_null_key = true;
+      EXPECT_EQ("null", it->first.as<std::string>());
+      EXPECT_EQ("value for null key", it->second.as<std::string>());
+    } else if (it->first.as<std::string>() == "key with null value") {
+      found_null_value = true;
+      EXPECT_EQ("tag:yaml.org,2002:null", it->second.Tag());
+      EXPECT_EQ("null", it->second.as<std::string>());
+    }
+  }
+  EXPECT_TRUE(found_null_key);
+  EXPECT_TRUE(found_null_value);
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
