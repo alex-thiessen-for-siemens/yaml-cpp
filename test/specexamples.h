@@ -934,4 +934,12 @@ const char *ex10_1 =
     "\n"
     "Flow style: !!map { Clark: Evans, Ingy: döt Net, Oren: Ben-Kiki }";
 
+const char *ex10_2 =
+    "Block style: !!seq\n"
+    "- Clark Evans\n"
+    "- Ingy döt Net\n"
+    "- Oren Ben-Kiki\n"
+    "\n"
+    "Flow style: !!seq [ Clark Evans, Ingy döt Net, Oren Ben-Kiki ]";
+
 }

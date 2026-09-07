@@ -1787,5 +1787,27 @@ TEST_F(HandlerSpecTest, Ex10_1_MapExamples) {
   Parse(ex10_1);
 }
 
+TEST_F(HandlerSpecTest, Ex10_2_SequenceExamples) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Block style"));
+  EXPECT_CALL(handler, OnSequenceStart(_, "tag:yaml.org,2002:seq", 0,
+                                       EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Clark Evans"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Ingy döt Net"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Oren Ben-Kiki"));
+  EXPECT_CALL(handler, OnSequenceEnd());
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Flow style"));
+  EXPECT_CALL(handler, OnSequenceStart(_, "tag:yaml.org,2002:seq", 0,
+                                       EmitterStyle::Flow));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Clark Evans"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Ingy döt Net"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Oren Ben-Kiki"));
+  EXPECT_CALL(handler, OnSequenceEnd());
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex10_2);
+}
+
 }  // namespace
 }  // namespace YAML
