@@ -286,7 +286,9 @@ const char *ex2_28 =
     "    code: |-\n"
     "      foo = bar";
 
-// TODO: 5.1 - 5.2 BOM
+const char *ex5_1 =
+    "\xEF\xBB\xBF"
+    "# Comment only.";
 
 const char *ex5_3 =
     "sequence:\n"

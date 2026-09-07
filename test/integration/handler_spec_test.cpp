@@ -636,7 +636,7 @@ TEST_F(HandlerSpecTest, Ex2_28_LogFile) {
   Parse(ex2_28);
 }
 
-// TODO: 5.1 - 5.2 BOM
+TEST_F(HandlerSpecTest, Ex5_1_ByteOrderMark) { Parse(ex5_1); }
 
 TEST_F(HandlerSpecTest, Ex5_3_BlockStructureIndicators) {
   EXPECT_CALL(handler, OnDocumentStart(_));
