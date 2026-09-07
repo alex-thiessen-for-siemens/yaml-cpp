@@ -1861,5 +1861,23 @@ TEST_F(HandlerSpecTest, Ex10_6_IntegerExamples) {
   Parse(ex10_6);
 }
 
+TEST_F(HandlerSpecTest, Ex10_7_FloatingPointExamples) {
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "negative"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:float", 0, "-1"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "zero"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:float", 0, "0"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "positive"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:float", 0, "2.3e4"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "infinity"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:float", 0, ".inf"));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "not a number"));
+  EXPECT_CALL(handler, OnScalar(_, "tag:yaml.org,2002:float", 0, ".nan"));
+  EXPECT_CALL(handler, OnMapEnd());
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex10_7);
+}
+
 }  // namespace
 }  // namespace YAML

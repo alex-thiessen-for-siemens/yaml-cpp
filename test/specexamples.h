@@ -961,4 +961,11 @@ const char *ex10_6 =
     "zero: !!int 0\n"
     "positive: !!int 34";
 
+const char *ex10_7 =
+    "negative: !!float -1\n"
+    "zero: !!float 0\n"
+    "positive: !!float 2.3e4\n"
+    "infinity: !!float .inf\n"
+    "not a number: !!float .nan";
+
 }
