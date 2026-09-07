@@ -728,6 +728,10 @@ TEST_F(HandlerSpecTest, Ex5_9_DirectiveIndicator) {
   Parse(ex5_9);
 }
 
+TEST_F(HandlerSpecTest, Ex5_10_InvalidUseOfReservedIndicators) {
+  EXPECT_THROW(IgnoreParse(ex5_10), ParserException);
+}
+
 TEST_F(HandlerSpecTest, Ex5_11_LineBreakCharacters) {
   EXPECT_CALL(handler, OnDocumentStart(_));
   EXPECT_CALL(handler, OnScalar(_, "!", 0,
