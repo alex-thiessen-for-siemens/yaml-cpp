@@ -1255,6 +1255,12 @@ TEST(NodeSpecTest, Ex10_4_NullExamples) {
   EXPECT_TRUE(found_null_value);
 }
 
+TEST(NodeSpecTest, Ex10_5_BooleanExamples) {
+  Node doc = Load(ex10_5);
+  EXPECT_TRUE(doc["YAML is a superset of JSON"].as<bool>());
+  EXPECT_FALSE(doc["Pluto is a planet"].as<bool>());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
