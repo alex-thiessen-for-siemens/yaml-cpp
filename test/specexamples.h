@@ -330,6 +330,10 @@ const char *ex5_9 =
     "%YAML 1.2\n"
     "--- text";
 
+const char *ex5_10 =
+    "commercial-at: @text\n"
+    "grave-accent: `text";
+
 const char *ex5_11 =
     "|\n"
     "  Line break (no glyph)\n"
