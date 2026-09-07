@@ -638,6 +638,10 @@ TEST_F(HandlerSpecTest, Ex2_28_LogFile) {
 
 TEST_F(HandlerSpecTest, Ex5_1_ByteOrderMark) { Parse(ex5_1); }
 
+TEST_F(HandlerSpecTest, Ex5_2_InvalidByteOrderMark) {
+  EXPECT_THROW(IgnoreParse(ex5_2), ParserException);
+}
+
 TEST_F(HandlerSpecTest, Ex5_3_BlockStructureIndicators) {
   EXPECT_CALL(handler, OnDocumentStart(_));
   EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
