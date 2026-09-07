@@ -1194,6 +1194,15 @@ TEST(NodeSpecTest, DISABLED_Ex9_4_ExplicitDocuments) {
   EXPECT_TRUE(docs[1].IsNull());
 }
 
+TEST(NodeSpecTest, DISABLED_Ex9_5_DirectivesDocuments) {
+  // SPEC_GAP: yaml-cpp rejects a directive document containing this literal
+  // block scalar.
+  std::vector<Node> docs = LoadAll(ex9_5);
+  ASSERT_EQ(2u, docs.size());
+  EXPECT_EQ("%!PS-Adobe-2.0\n", docs[0].as<std::string>());
+  EXPECT_TRUE(docs[1].IsNull());
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
