@@ -952,4 +952,8 @@ const char *ex10_4 =
     "!!null null: value for null key\n"
     "key with null value: !!null null";
 
+const char *ex10_5 =
+    "YAML is a superset of JSON: !!bool true\n"
+    "Pluto is a planet: !!bool false";
+
 }
