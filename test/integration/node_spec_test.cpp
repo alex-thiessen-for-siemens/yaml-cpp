@@ -979,14 +979,12 @@ TEST(NodeSpecTest, Ex8_4_ChompingFinalLineBreak) {
   EXPECT_EQ("text\n", doc["keep"].as<std::string>());
 }
 
-TEST(NodeSpecTest, DISABLED_Ex8_5_ChompingTrailingLines) {
+TEST(NodeSpecTest, Ex8_5_ChompingTrailingLines) {
   Node doc = Load(ex8_5);
   EXPECT_EQ(3, doc.size());
   EXPECT_EQ("# text", doc["strip"].as<std::string>());
   EXPECT_EQ("# text\n", doc["clip"].as<std::string>());
-  // NOTE: I believe this is a bug in the YAML spec -
-  // it should be "# text\n\n"
-  EXPECT_EQ("# text\n", doc["keep"].as<std::string>());
+  EXPECT_EQ("# text\n\n", doc["keep"].as<std::string>());
 }
 
 TEST(NodeSpecTest, Ex8_6_EmptyScalarChomping) {
@@ -1107,13 +1105,11 @@ TEST(NodeSpecTest, Ex8_20_BlockNodeTypes) {
   EXPECT_EQ("bar", doc[2]["foo"].as<std::string>());
 }
 
-TEST(NodeSpecTest, DISABLED_Ex8_21_BlockScalarNodes) {
+TEST(NodeSpecTest, Ex8_21_BlockScalarNodes) {
   Node doc = Load(ex8_21);
   EXPECT_EQ(2, doc.size());
-  // NOTE: I believe this is a bug in the YAML spec -
-  // it should be "value\n"
-  EXPECT_EQ("value", doc["literal"].as<std::string>());
-  EXPECT_EQ("value", doc["folded"].as<std::string>());
+  EXPECT_EQ("value\n", doc["literal"].as<std::string>());
+  EXPECT_EQ("value\n", doc["folded"].as<std::string>());
   EXPECT_EQ("!foo", doc["folded"].Tag());
 }
 

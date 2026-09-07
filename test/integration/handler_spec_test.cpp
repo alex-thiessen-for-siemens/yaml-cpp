@@ -1440,7 +1440,7 @@ TEST_F(HandlerSpecTest, Ex8_4_ChompingFinalLineBreak) {
   Parse(ex8_4);
 }
 
-TEST_F(HandlerSpecTest, DISABLED_Ex8_5_ChompingTrailingLines) {
+TEST_F(HandlerSpecTest, Ex8_5_ChompingTrailingLines) {
   EXPECT_CALL(handler, OnDocumentStart(_));
   EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
   EXPECT_CALL(handler, OnScalar(_, "?", 0, "strip"));
@@ -1448,9 +1448,7 @@ TEST_F(HandlerSpecTest, DISABLED_Ex8_5_ChompingTrailingLines) {
   EXPECT_CALL(handler, OnScalar(_, "?", 0, "clip"));
   EXPECT_CALL(handler, OnScalar(_, "!", 0, "# text\n"));
   EXPECT_CALL(handler, OnScalar(_, "?", 0, "keep"));
-  // NOTE: I believe this is a bug in the YAML spec -
-  // it should be "# text\n\n"
-  EXPECT_CALL(handler, OnScalar(_, "!", 0, "# text\n"));
+  EXPECT_CALL(handler, OnScalar(_, "!", 0, "# text\n\n"));
   EXPECT_CALL(handler, OnMapEnd());
   EXPECT_CALL(handler, OnDocumentEnd());
   Parse(ex8_5);
@@ -1646,15 +1644,13 @@ TEST_F(HandlerSpecTest, Ex8_20_BlockNodeTypes) {
   Parse(ex8_20);
 }
 
-TEST_F(HandlerSpecTest, DISABLED_Ex8_21_BlockScalarNodes) {
+TEST_F(HandlerSpecTest, Ex8_21_BlockScalarNodes) {
   EXPECT_CALL(handler, OnDocumentStart(_));
   EXPECT_CALL(handler, OnMapStart(_, "?", 0, EmitterStyle::Block));
   EXPECT_CALL(handler, OnScalar(_, "?", 0, "literal"));
-  // NOTE: I believe this is a bug in the YAML spec
-  // - it should be "value\n"
-  EXPECT_CALL(handler, OnScalar(_, "!", 0, "value"));
+  EXPECT_CALL(handler, OnScalar(_, "!", 0, "value\n"));
   EXPECT_CALL(handler, OnScalar(_, "?", 0, "folded"));
-  EXPECT_CALL(handler, OnScalar(_, "!foo", 0, "value"));
+  EXPECT_CALL(handler, OnScalar(_, "!foo", 0, "value\n"));
   EXPECT_CALL(handler, OnMapEnd());
   EXPECT_CALL(handler, OnDocumentEnd());
   Parse(ex8_21);
