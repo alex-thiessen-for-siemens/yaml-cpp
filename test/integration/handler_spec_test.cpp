@@ -1705,5 +1705,17 @@ TEST_F(HandlerSpecTest, Ex9_2_DocumentMarkers) {
   Parse(ex9_2);
 }
 
+TEST_F(HandlerSpecTest, DISABLED_Ex9_3_BareDocuments) {
+  // SPEC_GAP: yaml-cpp rejects a bare literal document after an empty
+  // document marker.
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnScalar(_, "?", 0, "Bare document"));
+  EXPECT_CALL(handler, OnDocumentEnd());
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler, OnScalar(_, "!", 0, "%!PS-Adobe-2.0\n"));
+  EXPECT_CALL(handler, OnDocumentEnd());
+  Parse(ex9_3);
+}
+
 }  // namespace
 }  // namespace YAML
