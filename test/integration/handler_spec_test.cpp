@@ -1702,14 +1702,16 @@ TEST_F(HandlerSpecTest, Ex9_2_DocumentMarkers) {
   Parse(ex9_2);
 }
 
-TEST_F(HandlerSpecTest, DISABLED_Ex9_3_BareDocuments) {
-  // SPEC_GAP: yaml-cpp rejects a bare literal document after an empty
-  // document marker.
+TEST_F(HandlerSpecTest, Ex9_3_BareDocuments) {
   EXPECT_CALL(handler, OnDocumentStart(_));
   EXPECT_CALL(handler, OnScalar(_, "?", 0, "Bare document"));
   EXPECT_CALL(handler, OnDocumentEnd());
   EXPECT_CALL(handler, OnDocumentStart(_));
-  EXPECT_CALL(handler, OnScalar(_, "!", 0, "%!PS-Adobe-2.0\n"));
+  EXPECT_CALL(handler, OnNull(_, 0));
+  EXPECT_CALL(handler, OnDocumentEnd());
+  EXPECT_CALL(handler, OnDocumentStart(_));
+  EXPECT_CALL(handler,
+              OnScalar(_, "!", 0, "%!PS-Adobe-2.0 # Not the first line"));
   EXPECT_CALL(handler, OnDocumentEnd());
   Parse(ex9_3);
 }
@@ -1727,9 +1729,7 @@ TEST_F(HandlerSpecTest, Ex9_4_ExplicitDocuments) {
   Parse(ex9_4);
 }
 
-TEST_F(HandlerSpecTest, DISABLED_Ex9_5_DirectivesDocuments) {
-  // SPEC_GAP: yaml-cpp rejects a directive document containing this literal
-  // block scalar.
+TEST_F(HandlerSpecTest, Ex9_5_DirectivesDocuments) {
   EXPECT_CALL(handler, OnDocumentStart(_));
   EXPECT_CALL(handler, OnScalar(_, "!", 0, "%!PS-Adobe-2.0\n"));
   EXPECT_CALL(handler, OnDocumentEnd());

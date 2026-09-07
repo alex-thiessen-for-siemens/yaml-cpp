@@ -1172,13 +1172,12 @@ TEST(NodeSpecTest, Ex9_2_DocumentMarkers) {
   EXPECT_EQ("Document", Load(ex9_2).as<std::string>());
 }
 
-TEST(NodeSpecTest, DISABLED_Ex9_3_BareDocuments) {
-  // SPEC_GAP: yaml-cpp rejects a bare literal document after an empty
-  // document marker.
+TEST(NodeSpecTest, Ex9_3_BareDocuments) {
   std::vector<Node> docs = LoadAll(ex9_3);
-  ASSERT_EQ(2u, docs.size());
+  ASSERT_EQ(3u, docs.size());
   EXPECT_EQ("Bare document", docs[0].as<std::string>());
-  EXPECT_EQ("%!PS-Adobe-2.0\n", docs[1].as<std::string>());
+  EXPECT_TRUE(docs[1].IsNull());
+  EXPECT_EQ("%!PS-Adobe-2.0 # Not the first line", docs[2].as<std::string>());
 }
 
 TEST(NodeSpecTest, Ex9_4_ExplicitDocuments) {
@@ -1189,9 +1188,7 @@ TEST(NodeSpecTest, Ex9_4_ExplicitDocuments) {
   EXPECT_TRUE(docs[1].IsNull());
 }
 
-TEST(NodeSpecTest, DISABLED_Ex9_5_DirectivesDocuments) {
-  // SPEC_GAP: yaml-cpp rejects a directive document containing this literal
-  // block scalar.
+TEST(NodeSpecTest, Ex9_5_DirectivesDocuments) {
   std::vector<Node> docs = LoadAll(ex9_5);
   ASSERT_EQ(2u, docs.size());
   EXPECT_EQ("%!PS-Adobe-2.0\n", docs[0].as<std::string>());

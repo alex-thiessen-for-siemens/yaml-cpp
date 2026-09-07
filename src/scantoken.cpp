@@ -423,9 +423,13 @@ void Scanner::ScanBlockScalar() {
     throw ParserException(INPUT.mark(), ErrorMsg::CHAR_IN_BLOCK);
 
   // set the initial indentation
-  if (GetTopIndent() >= 0)
+  if (GetTopIndent() >= 0) {
     params.indent += GetTopIndent();
+  } else if (params.detectIndent) {
+    params.indent = 0;
+  }
 
+  params.onDocIndicator = BREAK;
   params.eatLeadingWhitespace = false;
   params.trimTrailingSpaces = false;
   params.onTabInIndentation = THROW;
