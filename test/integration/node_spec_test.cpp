@@ -1268,6 +1268,16 @@ TEST(NodeSpecTest, Ex10_6_IntegerExamples) {
   EXPECT_EQ(34, doc["positive"].as<int>());
 }
 
+TEST(NodeSpecTest, Ex10_7_FloatingPointExamples) {
+  Node doc = Load(ex10_7);
+  EXPECT_DOUBLE_EQ(-1.0, doc["negative"].as<double>());
+  EXPECT_DOUBLE_EQ(0.0, doc["zero"].as<double>());
+  EXPECT_DOUBLE_EQ(23000.0, doc["positive"].as<double>());
+  EXPECT_TRUE(std::isinf(doc["infinity"].as<double>()));
+  EXPECT_GT(doc["infinity"].as<double>(), 0.0);
+  EXPECT_TRUE(std::isnan(doc["not a number"].as<double>()));
+}
+
 TEST(NodeSpecTest, FlowMapNotClosed) {
   EXPECT_THROW_PARSER_EXCEPTION(Load("{x:"), ErrorMsg::UNKNOWN_TOKEN);
 }
