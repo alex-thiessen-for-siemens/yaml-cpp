@@ -428,6 +428,10 @@ TEST(NodeSpecTest, Ex2_28_LogFile) {
 
 TEST(NodeSpecTest, Ex5_1_ByteOrderMark) { EXPECT_TRUE(Load(ex5_1).IsNull()); }
 
+TEST(NodeSpecTest, Ex5_2_InvalidByteOrderMark) {
+  EXPECT_THROW(Load(ex5_2), ParserException);
+}
+
 TEST(NodeSpecTest, Ex5_3_BlockStructureIndicators) {
   Node doc = Load(ex5_3);
   EXPECT_EQ(2, doc.size());
