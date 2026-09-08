@@ -5,6 +5,16 @@ requested behavior, or a clearly stated maintenance task. Before editing,
 inspect the relevant implementation, its owning tests, nearby invariants, and
 recent history. Do not guess from filenames or from an issue title alone.
 
+All commits produced for `yaml-cpp` by the user or Copilot must be signed with
+OpenPGP key ID `9F77750E827051B3`. Before creating or committing in a
+worktree, run
+`.github/skills/yaml-cpp-contribution-intake/configure-commit-signing.sh`.
+It verifies that the secret key is available and enables repository-local
+signing. Before export or publication, run
+`.github/skills/yaml-cpp-contribution-intake/check-commit-signatures.sh
+BASE..HEAD`. A GitHub `Verified` badge also requires the public key and
+matching email to be registered with the user's GitHub account.
+
 Keep the setup checkout and contribution checkout separate. The branch that
 contains these instructions, skills, and agents is private workflow
 infrastructure, not an upstream contribution. Before editing yaml-cpp code,

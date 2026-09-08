@@ -47,6 +47,10 @@ commit. Confirm:
   unrelated cleanup will appear in the upstream PR. Pre-existing formatting
   or static-analysis findings outside changed hunks are preserved rather than
   “fixed” opportunistically;
+* every commit in the implementation range is signed by OpenPGP key
+  `9F77750E827051B3`; run
+  `.github/skills/yaml-cpp-contribution-intake/check-commit-signatures.sh
+  BASE..HEAD` before export;
 * feature-introduced review repairs are folded into the relevant feature
   commit or logical series. A correction-only commit is a readiness blocker
   unless the user explicitly requested an incremental history.

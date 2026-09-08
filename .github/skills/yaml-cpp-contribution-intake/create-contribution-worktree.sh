@@ -4,6 +4,10 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck disable=SC1091
+source "${script_dir}/commit-signing-policy.sh"
+
 usage() {
   printf '%s\n' \
     "Usage: create-contribution-worktree.sh WORKTREE_PATH BRANCH" \
@@ -40,12 +44,16 @@ if ! git rev-parse --verify "${base_ref}^{commit}" >/dev/null 2>&1; then
   printf 'error: base ref is unavailable: %s\n' "${base_ref}" >&2
   exit 2
 fi
+require_yaml_cpp_signing_key
 setup_commit=$(git rev-parse --verify "${setup_ref}^{commit}")
 base_commit=$(git rev-parse --verify "${base_ref}^{commit}")
 if ! git cat-file -e "${setup_commit}:.github/copilot-instructions.md" ||
   ! git cat-file -e "${setup_commit}:.github/skills/unslop/SKILL.md" ||
+  ! git cat-file -e "${setup_commit}:.github/agents/yaml-cpp-contributor.agent.md" ||
   ! git cat-file -e \
-  "${setup_commit}:.github/agents/yaml-cpp-contributor.agent.md"; then
+  "${setup_commit}:.github/skills/yaml-cpp-contribution-intake/commit-signing-policy.sh" ||
+  ! git cat-file -e \
+  "${setup_commit}:.github/skills/yaml-cpp-contribution-intake/check-commit-signatures.sh"; then
   printf '%s\n' \
     "error: setup ref does not contain the repository Copilot setup" >&2
   exit 2
@@ -93,7 +101,11 @@ worktree_created=true
 
 git -C "${worktree_path}" checkout "${setup_commit}" -- .github
 git -C "${worktree_path}" add -- .github
-git -C "${worktree_path}" commit \
+git -C "${worktree_path}" config --local user.signingkey \
+  "${YAML_CPP_SIGNING_KEY}"
+git -C "${worktree_path}" config --local commit.gpgsign true
+git -C "${worktree_path}" config --local gpg.format openpgp
+git -C "${worktree_path}" commit -S"${YAML_CPP_SIGNING_KEY}" \
   -m "Apply private Copilot setup" \
   -m "Keep repository-local skills and agents available during contribution work.
 

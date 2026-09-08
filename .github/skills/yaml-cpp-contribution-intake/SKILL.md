@@ -18,6 +18,12 @@ custom agents. Do not implement on the setup checkout or on a clean
 upstream-only branch, because those checkouts cannot discover the
 repository-local workflow.
 
+Before any commit, run
+`.github/skills/yaml-cpp-contribution-intake/configure-commit-signing.sh`.
+All commits must be signed with key ID `9F77750E827051B3`. Use
+`check-commit-signatures.sh BASE..HEAD` before export and record its result in
+the private evidence ledger.
+
 1. Record the requested behavior, observable failure or acceptance condition,
    intended base branch, and any user constraints in the session evidence
    ledger. Locate the ledger in the CLI session's private artifacts, not in

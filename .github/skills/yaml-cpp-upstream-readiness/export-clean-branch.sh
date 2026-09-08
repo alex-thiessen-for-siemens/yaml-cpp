@@ -4,6 +4,10 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck disable=SC1091
+source "${script_dir}/../yaml-cpp-contribution-intake/commit-signing-policy.sh"
+
 usage() {
   printf '%s\n' \
     "Usage: export-clean-branch.sh NEW_BRANCH [BASE_REF]" \
@@ -48,6 +52,9 @@ if ! git rev-parse --verify "${base_ref}^{commit}" >/dev/null 2>&1; then
   printf 'error: base ref is unavailable: %s\n' "${base_ref}" >&2
   exit 2
 fi
+require_yaml_cpp_signing_key
+"${script_dir}/../yaml-cpp-contribution-intake/check-commit-signatures.sh" \
+  "${base_ref}..HEAD"
 if git show-ref --verify --quiet "refs/heads/${new_branch}"; then
   printf 'error: branch already exists: %s\n' "${new_branch}" >&2
   exit 2

@@ -11,7 +11,12 @@ diff is exported.
 1. Update the private session evidence ledger with the hypothesis, changed
    files, current base, and the exact checks planned. Keep logs on disk and
    record only commands, exit status, useful diagnostics, and conclusions.
-2. Inventory the tools and versions. Run
+2. Configure signed commits with
+   `.github/skills/yaml-cpp-contribution-intake/configure-commit-signing.sh`.
+   Before readiness, verify the complete implementation range with
+   `check-commit-signatures.sh BASE..HEAD`. Record the key ID and result in
+   the ledger.
+3. Inventory the tools and versions. Run
    `.github/skills/yaml-cpp-evaluation-loop/run-evaluation.sh --inventory`.
    For every useful missing or incompatible host tool, first check whether
    Docker can run
@@ -20,7 +25,7 @@ diff is exported.
    without changing the host. If Docker is unavailable, ask the user whether
    to install it or waive container coverage. Record the decision and scope. A
    waiver is not a pass.
-3. For YAML-observable behavior changes, run
+4. For YAML-observable behavior changes, run
    `/yaml-cpp-reference-check` after the targeted test and before the
    broad evaluator. Use only local adapters and a local fixture; record the
    implementation version, schema, normalization, and result. For parser- or
@@ -29,27 +34,27 @@ diff is exported.
    retain a matching semantic implementation as a separate comparison. A
    mismatch is a failure. If no matching local implementation exists, record
    the explicit limitation and do not call the behavior reference-verified.
-4. For public-header, exported-symbol, class-layout, visibility, installed
+5. For public-header, exported-symbol, class-layout, visibility, installed
    include-path, package, or `SOVERSION` changes, run
    `/yaml-cpp-abi-analysis` before the broad evaluator. A missing libabigail
    tool is an explicit coverage limitation, not a pass; use the symbol and
    SONAME screen only as incomplete diagnostic evidence.
-5. Run the smallest relevant CMake test and formatting check first. Then run
+6. Run the smallest relevant CMake test and formatting check first. Then run
    `run-evaluation.sh` on the host or the container runner with the selected
    waivers. Both evaluators use isolated build directories and never change
    source files. Formatting and clang-tidy are scoped to changed C++ line
    ranges, and cppcheck diagnostics are compared with those ranges, so a
    pre-existing finding on an untouched line must not force unrelated cleanup.
    A finding in a changed range remains a failure.
-6. Diagnose the first concrete failure. Inspect its output and affected code,
+7. Diagnose the first concrete failure. Inspect its output and affected code,
    make one focused repair, and rerun the affected phase. Do not rewrite a
    passing area or restart all model reasoning for an unrelated failure. If
    the failure was introduced by the feature, keep the repair in the existing
    feature commit or logical series; use amend or fixup/autosquash rather than
    adding a correction-only commit.
-7. After deterministic checks pass, run bounded safety and acceptance reviews.
+8. After deterministic checks pass, run bounded safety and acceptance reviews.
    Repair only concrete blockers and rerun the affected checks.
-8. Before upstream readiness, inspect the complete feature history. Fold
+9. Before upstream readiness, inspect the complete feature history. Fold
    review repairs caused by the feature into the relevant commit or series,
    then rerun affected checks. If a reference comparison passed, require a
    `Reference verification:` block in the feature commit body with every

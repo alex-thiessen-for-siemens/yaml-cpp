@@ -17,6 +17,12 @@ the setup checkout or switch the implementation worktree to a clean
 upstream-only branch before the workflow finishes. The final clean branch
 belongs in a separate worktree.
 
+Before creating any commit, run
+`.github/skills/yaml-cpp-contribution-intake/configure-commit-signing.sh`.
+Require OpenPGP key `9F77750E827051B3` for every commit produced in the
+implementation and clean export worktrees. Verify the complete implementation
+range with `check-commit-signatures.sh BASE..HEAD` before export.
+
 Use `/yaml-cpp-contribution-intake` before editing. Keep a private session
 evidence ledger. Read only the relevant source, tests, build files, and bounded
 history. Do not load vendored GoogleTest or paste full logs into context.
@@ -79,6 +85,8 @@ Work in this order:
    inspect the complete commit history for correction-only commits. A
    published branch may be force-pushed only after the user explicitly
    approves the history rewrite.
+   Verify that every commit in the implementation range is signed with
+   `9F77750E827051B3` before exporting.
    If a reference comparison passed, put a `Reference verification:` block in
    the feature commit body with every reference name, exact version, schema or
    layer, and result. If none applies, put the explicit not-applicable reason
