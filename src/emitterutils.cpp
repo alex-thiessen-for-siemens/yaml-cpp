@@ -6,8 +6,6 @@
 #include "emitterutils.h"
 #include "exp.h"
 #include "indentation.h"
-#include "regex_yaml.h"
-#include "regeximpl.h"
 #include "stringsource.h"
 #include "yaml-cpp/binary.h"  // IWYU pragma: keep
 #include "yaml-cpp/null.h"
@@ -161,8 +159,9 @@ bool IsValidPlainScalar(const char* str, std::size_t size, FlowType::value flowT
   }
 
   // check the start
-  const RegEx& start = (flowType == FlowType::Flow ? Exp::PlainScalarInFlow()
-                                                   : Exp::PlainScalar());
+  const ConstRegEx& start =
+      (flowType == FlowType::Flow ? Exp::PlainScalarInFlow()
+                                  : Exp::PlainScalar());
   if (!start.Matches(StringCharSource(str, size))) {
     return false;
   }
@@ -174,16 +173,9 @@ bool IsValidPlainScalar(const char* str, std::size_t size, FlowType::value flowT
   }
 
   // then check until something is disallowed
-  static const RegEx disallowed_flow =
-      Exp::EndScalarInFlow() | (Exp::BlankOrBreak() + Exp::Comment()) |
-      Exp::NotPrintable() | Exp::Utf8_ByteOrderMark() | Exp::Break() |
-      Exp::Tab() | Exp::Ampersand();
-  static const RegEx disallowed_block =
-      Exp::EndScalar() | (Exp::BlankOrBreak() + Exp::Comment()) |
-      Exp::NotPrintable() | Exp::Utf8_ByteOrderMark() | Exp::Break() |
-      Exp::Tab() | Exp::Ampersand();
-  const RegEx& disallowed =
-      flowType == FlowType::Flow ? disallowed_flow : disallowed_block;
+  const ConstRegEx& disallowed = flowType == FlowType::Flow
+                                     ? Exp::DisallowedFlow()
+                                     : Exp::DisallowedBlock();
 
   StringCharSource buffer(str, size);
   while (buffer) {
@@ -487,7 +479,7 @@ bool WriteAnchor(ostream_wrapper& out, const char* str, std::size_t size) {
 bool WriteTag(ostream_wrapper& out, const std::string& str, bool verbatim) {
   out << (verbatim ? "!<" : "!");
   StringCharSource buffer(str.c_str(), str.size());
-  const RegEx& reValid = verbatim ? Exp::URI() : Exp::Tag();
+  const ConstRegEx& reValid = verbatim ? Exp::URI() : Exp::Tag();
   while (buffer) {
     int n = reValid.Match(buffer);
     if (n <= 0) {

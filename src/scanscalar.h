@@ -9,7 +9,7 @@
 
 #include <string>
 
-#include "regex_yaml.h"
+#include "regex_yaml_const.h"
 #include "stream.h"
 
 namespace YAML {
@@ -33,8 +33,8 @@ struct ScanScalarParams {
         leadingSpaces(false) {}
 
   // input:
-  const RegEx* end;   // what condition ends this scalar?
-                      // unowned.
+  const ConstRegEx* end;  // what condition ends this scalar?
+                          // unowned.
   bool eatEnd;        // should we eat that condition when we see it?
   int indent;         // what level of indentation should be eaten and ignored?
   bool detectIndent;  // should we try to autodetect the indent?

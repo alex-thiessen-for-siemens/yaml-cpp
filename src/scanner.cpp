@@ -267,7 +267,7 @@ void Scanner::ScanToNextToken() {
 ///////////////////////////////////////////////////////////////////////
 // Misc. helpers
 
-const RegEx& Scanner::GetValueRegex() const {
+const ConstRegEx& Scanner::GetValueRegex() const {
   if (InBlockContext()) {
     return Exp::Value();
   }

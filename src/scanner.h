@@ -20,7 +20,7 @@
 
 namespace YAML {
 class Node;
-class RegEx;
+class ConstRegEx;
 
 /**
  * A scanner transforms a stream of characters into a stream of tokens.
@@ -132,7 +132,7 @@ class Scanner {
   /**
    * Returns the appropriate regex to check if the next token is a value token.
    */
-  const RegEx &GetValueRegex() const;
+  const ConstRegEx &GetValueRegex() const;
 
   struct SimpleKey {
     SimpleKey(const Mark &mark_, std::size_t flowLevel_);

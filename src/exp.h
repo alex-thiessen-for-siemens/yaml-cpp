@@ -10,7 +10,7 @@
 #include <ios>
 #include <string>
 
-#include "regex_yaml.h"
+#include "regex_yaml_const.h"
 #include "stream.h"
 
 namespace YAML {
@@ -19,187 +19,196 @@ namespace YAML {
 // file.
 
 namespace Exp {
-// misc
-inline const RegEx& Empty() {
-  static const RegEx e;
-  return e;
-}
-inline const RegEx& Space() {
-  static const RegEx e = RegEx(' ');
-  return e;
-}
-inline const RegEx& Tab() {
-  static const RegEx e = RegEx('\t');
-  return e;
-}
-inline const RegEx& Blank() {
-  static const RegEx e = Space() | Tab();
-  return e;
-}
-inline const RegEx& Break() {
-  static const RegEx e = RegEx('\n') | RegEx("\r\n") | RegEx('\r');
-  return e;
-}
-inline const RegEx& BlankOrBreak() {
-  static const RegEx e = Blank() | Break();
-  return e;
-}
-inline const RegEx& Digit() {
-  static const RegEx e = RegEx('0', '9');
-  return e;
-}
-inline const RegEx& Alpha() {
-  static const RegEx e = RegEx('a', 'z') | RegEx('A', 'Z');
-  return e;
-}
-inline const RegEx& AlphaNumeric() {
-  static const RegEx e = Alpha() | Digit();
-  return e;
-}
-inline const RegEx& Word() {
-  static const RegEx e = AlphaNumeric() | RegEx('-');
-  return e;
-}
-inline const RegEx& Hex() {
-  static const RegEx e = Digit() | RegEx('A', 'F') | RegEx('a', 'f');
-  return e;
-}
-// Valid Unicode code points that are not part of c-printable (YAML 1.2, sec.
-// 5.1)
-inline const RegEx& NotPrintable() {
-  static const RegEx e =
-      RegEx(0) |
-      RegEx("\x01\x02\x03\x04\x05\x06\x07\x08\x0B\x0C\x7F", REGEX_OR) |
-      RegEx(0x0E, 0x1F) |
-      (RegEx('\xC2') + (RegEx('\x80', '\x84') | RegEx('\x86', '\x9F')));
-  return e;
-}
-inline const RegEx& Utf8_ByteOrderMark() {
-  static const RegEx e = RegEx("\xEF\xBB\xBF");
-  return e;
+namespace Patterns {
+typedef ConstEmpty Empty;
+typedef ConstCharSet<' '> Space;
+typedef ConstCharSet<'\t'> Tab;
+typedef ConstCharSet<' ', '\t'> Blank;
+typedef ConstByte<'\n'> LineFeed;
+typedef ConstSeq<ConstByte<'\r'>, ConstByte<'\n'>> CarriageReturnLineFeed;
+typedef ConstOr<LineFeed, ConstOr<CarriageReturnLineFeed, ConstByte<'\r'>>>
+    Break;
+typedef ConstOr<Blank, Break> BlankOrBreak;
+typedef ConstRange<'0', '9'> Digit;
+typedef ConstOr<ConstRange<'a', 'z'>, ConstRange<'A', 'Z'>> Alpha;
+typedef ConstOr<Alpha, Digit> AlphaNumeric;
+typedef ConstOr<AlphaNumeric, ConstByte<'-'>> Word;
+typedef ConstOr<Digit, ConstOr<ConstRange<'A', 'F'>, ConstRange<'a', 'f'>>> Hex;
+
+typedef ConstCharSet<1, 2, 3, 4, 5, 6, 7, 8, 0x0B, 0x0C, 0x7F>
+    NotPrintableBytes;
+typedef ConstOr<ConstRange<0x80, 0x84>, ConstRange<0x86, 0x9F>>
+    NotPrintableUtf8Tail;
+typedef ConstSeq<ConstByte<0xC2>, NotPrintableUtf8Tail> NotPrintableUtf8;
+typedef ConstOr<ConstByte<0>,
+                ConstOr<NotPrintableBytes,
+                        ConstOr<ConstRange<0x0E, 0x1F>, NotPrintableUtf8>>>
+    NotPrintable;
+typedef ConstSeq<ConstByte<0xEF>, ConstSeq<ConstByte<0xBB>, ConstByte<0xBF>>>
+    Utf8ByteOrderMark;
+
+typedef ConstSeq<ConstByte<'-'>, ConstSeq<ConstByte<'-'>, ConstByte<'-'>>>
+    DocumentStartPrefix;
+typedef ConstSeq<ConstByte<'.'>, ConstSeq<ConstByte<'.'>, ConstByte<'.'>>>
+    DocumentEndPrefix;
+typedef ConstOr<BlankOrBreak, Empty> DocumentMarkerSuffix;
+typedef ConstSeq<DocumentStartPrefix, DocumentMarkerSuffix> DocumentStart;
+typedef ConstSeq<DocumentEndPrefix, DocumentMarkerSuffix> DocumentEnd;
+typedef ConstOr<DocumentStart, DocumentEnd> DocumentIndicator;
+typedef ConstSeq<ConstByte<'-'>, DocumentMarkerSuffix> BlockEntry;
+typedef ConstSeq<ConstByte<'?'>, BlankOrBreak> Key;
+typedef Key KeyInFlow;
+typedef ConstSeq<ConstByte<':'>, DocumentMarkerSuffix> Value;
+typedef ConstCharSet<',', ']', '}'> FlowValueTerminators;
+typedef ConstSeq<ConstByte<':'>, ConstOr<BlankOrBreak, FlowValueTerminators>>
+    ValueInFlow;
+typedef ConstByte<':'> ValueInJSONFlow;
+typedef ConstByte<'&'> Ampersand;
+typedef ConstByte<'#'> Comment;
+typedef ConstCharSet<'[', ']', '{', '}', ','> AnchorTerminators;
+typedef ConstNot<ConstOr<AnchorTerminators, BlankOrBreak>> Anchor;
+typedef ConstOr<ConstCharSet<'?', ':', ',', ']', '}', '%', '@', 0x60>,
+                BlankOrBreak>
+    AnchorEnd;
+
+typedef ConstCharSet<'#', ';', '/', '?', ':', '@', '&', '=', '+', '$', ',', '_',
+                     '.', '!', '~', '*', '\'', '(', ')', '[', ']'>
+    UriCharacters;
+typedef ConstCharSet<'#', ';', '/', '?', ':', '@', '&', '=', '+', '$', '_', '.',
+                     '~', '*', '\'', '(', ')'>
+    TagCharacters;
+typedef ConstSeq<ConstByte<'%'>, ConstSeq<Hex, Hex>> PercentEncoded;
+typedef ConstOr<Word, ConstOr<UriCharacters, PercentEncoded>> Uri;
+typedef ConstOr<Word, ConstOr<TagCharacters, PercentEncoded>> Tag;
+
+typedef ConstCharSet<',', '[', ']', '{', '}', '#', '&', '*', '!', '|', '>',
+                     '\'', '"', '%', '@', 0x60>
+    PlainScalarTerminators;
+typedef ConstCharSet<'-', '?', ':'> PlainScalarIndicators;
+typedef ConstOr<
+    BlankOrBreak,
+    ConstOr<PlainScalarTerminators,
+            ConstSeq<PlainScalarIndicators, ConstOr<BlankOrBreak, Empty>>>>
+    PlainScalarRejection;
+typedef ConstNot<PlainScalarRejection> PlainScalar;
+
+typedef ConstCharSet<'?', ',', '[', ']', '{', '}', '#', '&', '*', '!', '|', '>',
+                     '\'', '"', '%', '@', 0x60>
+    PlainScalarFlowTerminators;
+typedef ConstCharSet<'-', ':'> PlainScalarFlowIndicators;
+typedef ConstOr<
+    BlankOrBreak,
+    ConstOr<PlainScalarFlowTerminators,
+            ConstSeq<PlainScalarFlowIndicators, ConstOr<Blank, Empty>>>>
+    PlainScalarFlowRejection;
+typedef ConstNot<PlainScalarFlowRejection> PlainScalarInFlow;
+
+typedef ConstSeq<ConstByte<':'>, DocumentMarkerSuffix> EndScalar;
+typedef ConstCharSet<',', '?', '[', ']', '{', '}'> FlowScalarTerminators;
+typedef ConstSeq<ConstByte<':'>,
+                 ConstOr<ConstOr<BlankOrBreak, Empty>, FlowValueTerminators>>
+    EndScalarInFlowPrefix;
+typedef ConstOr<EndScalarInFlowPrefix, FlowScalarTerminators> EndScalarInFlow;
+typedef ConstSeq<BlankOrBreak, Comment> CommentAfterBreak;
+typedef ConstOr<EndScalarInFlow, CommentAfterBreak> ScanScalarEndInFlow;
+typedef ConstOr<EndScalar, CommentAfterBreak> ScanScalarEnd;
+typedef ConstSeq<ConstByte<'\''>, ConstByte<'\''>> EscSingleQuote;
+typedef ConstSeq<ConstByte<'\\'>, Break> EscBreak;
+typedef ConstAnd<ConstByte<'\''>, ConstNot<EscSingleQuote>> SingleQuoteEnd;
+typedef ConstByte<'"'> DoubleQuoteEnd;
+typedef ConstCharSet<'+', '-'> ChompIndicator;
+typedef ConstOr<
+    ConstSeq<ChompIndicator, Digit>,
+    ConstOr<ConstSeq<Digit, ChompIndicator>, ConstOr<ChompIndicator, Digit>>>
+    Chomp;
+typedef ConstOr<Tab, Ampersand> DisallowedWhitespace;
+typedef ConstOr<Break, DisallowedWhitespace> DisallowedBreak;
+typedef ConstOr<Utf8ByteOrderMark, DisallowedBreak> DisallowedEncoding;
+typedef ConstOr<NotPrintable, DisallowedEncoding> DisallowedCharacters;
+typedef ConstOr<CommentAfterBreak, DisallowedCharacters> DisallowedAfterComment;
+typedef ConstOr<EndScalarInFlow, DisallowedAfterComment> DisallowedFlow;
+typedef ConstOr<EndScalar, DisallowedAfterComment> DisallowedBlock;
+}  // namespace Patterns
+
+template <typename Pattern>
+inline const ConstRegEx& Get() {
+  static constexpr ConstRegEx expression = MakeConstRegEx<Pattern>();
+  return expression;
 }
 
-// actual tags
-
-inline const RegEx& DocStart() {
-  static const RegEx e = RegEx("---") + (BlankOrBreak() | RegEx());
-  return e;
+inline const ConstRegEx& Empty() { return Get<Patterns::Empty>(); }
+inline const ConstRegEx& Space() { return Get<Patterns::Space>(); }
+inline const ConstRegEx& Tab() { return Get<Patterns::Tab>(); }
+inline const ConstRegEx& Blank() { return Get<Patterns::Blank>(); }
+inline const ConstRegEx& Break() { return Get<Patterns::Break>(); }
+inline const ConstRegEx& BlankOrBreak() {
+  return Get<Patterns::BlankOrBreak>();
 }
-inline const RegEx& DocEnd() {
-  static const RegEx e = RegEx("...") + (BlankOrBreak() | RegEx());
-  return e;
+inline const ConstRegEx& Digit() { return Get<Patterns::Digit>(); }
+inline const ConstRegEx& Alpha() { return Get<Patterns::Alpha>(); }
+inline const ConstRegEx& AlphaNumeric() {
+  return Get<Patterns::AlphaNumeric>();
 }
-inline const RegEx& DocIndicator() {
-  static const RegEx e = DocStart() | DocEnd();
-  return e;
+inline const ConstRegEx& Word() { return Get<Patterns::Word>(); }
+inline const ConstRegEx& Hex() { return Get<Patterns::Hex>(); }
+inline const ConstRegEx& NotPrintable() {
+  return Get<Patterns::NotPrintable>();
 }
-inline const RegEx& BlockEntry() {
-  static const RegEx e = RegEx('-') + (BlankOrBreak() | RegEx());
-  return e;
+inline const ConstRegEx& Utf8_ByteOrderMark() {
+  return Get<Patterns::Utf8ByteOrderMark>();
 }
-inline const RegEx& Key() {
-  static const RegEx e = RegEx('?') + BlankOrBreak();
-  return e;
+inline const ConstRegEx& DocStart() { return Get<Patterns::DocumentStart>(); }
+inline const ConstRegEx& DocEnd() { return Get<Patterns::DocumentEnd>(); }
+inline const ConstRegEx& DocIndicator() {
+  return Get<Patterns::DocumentIndicator>();
 }
-inline const RegEx& KeyInFlow() {
-  static const RegEx e = RegEx('?') + BlankOrBreak();
-  return e;
+inline const ConstRegEx& BlockEntry() { return Get<Patterns::BlockEntry>(); }
+inline const ConstRegEx& Key() { return Get<Patterns::Key>(); }
+inline const ConstRegEx& KeyInFlow() { return Get<Patterns::KeyInFlow>(); }
+inline const ConstRegEx& Value() { return Get<Patterns::Value>(); }
+inline const ConstRegEx& ValueInFlow() { return Get<Patterns::ValueInFlow>(); }
+inline const ConstRegEx& ValueInJSONFlow() {
+  return Get<Patterns::ValueInJSONFlow>();
 }
-inline const RegEx& Value() {
-  static const RegEx e = RegEx(':') + (BlankOrBreak() | RegEx());
-  return e;
+inline const ConstRegEx& Ampersand() { return Get<Patterns::Ampersand>(); }
+inline const ConstRegEx& Comment() { return Get<Patterns::Comment>(); }
+inline const ConstRegEx& Anchor() { return Get<Patterns::Anchor>(); }
+inline const ConstRegEx& AnchorEnd() { return Get<Patterns::AnchorEnd>(); }
+inline const ConstRegEx& URI() { return Get<Patterns::Uri>(); }
+inline const ConstRegEx& Tag() { return Get<Patterns::Tag>(); }
+inline const ConstRegEx& PlainScalar() { return Get<Patterns::PlainScalar>(); }
+inline const ConstRegEx& PlainScalarInFlow() {
+  return Get<Patterns::PlainScalarInFlow>();
 }
-inline const RegEx& ValueInFlow() {
-  static const RegEx e = RegEx(':') + (BlankOrBreak() | RegEx(",]}", REGEX_OR));
-  return e;
+inline const ConstRegEx& EndScalar() { return Get<Patterns::EndScalar>(); }
+inline const ConstRegEx& EndScalarInFlow() {
+  return Get<Patterns::EndScalarInFlow>();
 }
-inline const RegEx& ValueInJSONFlow() {
-  static const RegEx e = RegEx(':');
-  return e;
+inline const ConstRegEx& ScanScalarEndInFlow() {
+  return Get<Patterns::ScanScalarEndInFlow>();
 }
-inline const RegEx& Ampersand() {
-  static const RegEx e = RegEx('&');
-  return e;
+inline const ConstRegEx& ScanScalarEnd() {
+  return Get<Patterns::ScanScalarEnd>();
 }
-inline const RegEx Comment() {
-  static const RegEx e = RegEx('#');
-  return e;
+inline const ConstRegEx& EscSingleQuote() {
+  return Get<Patterns::EscSingleQuote>();
 }
-inline const RegEx& Anchor() {
-  static const RegEx e = !(RegEx("[]{},", REGEX_OR) | BlankOrBreak());
-  return e;
+inline const ConstRegEx& EscBreak() { return Get<Patterns::EscBreak>(); }
+inline const ConstRegEx& SingleQuoteEnd() {
+  return Get<Patterns::SingleQuoteEnd>();
 }
-inline const RegEx& AnchorEnd() {
-  static const RegEx e = RegEx("?:,]}%@`", REGEX_OR) | BlankOrBreak();
-  return e;
+inline const ConstRegEx& DoubleQuoteEnd() {
+  return Get<Patterns::DoubleQuoteEnd>();
 }
-inline const RegEx& URI() {
-  static const RegEx e = Word() | RegEx("#;/?:@&=+$,_.!~*'()[]", REGEX_OR) |
-                         (RegEx('%') + Hex() + Hex());
-  return e;
+inline const ConstRegEx& ChompIndicator() {
+  return Get<Patterns::ChompIndicator>();
 }
-inline const RegEx& Tag() {
-  static const RegEx e = Word() | RegEx("#;/?:@&=+$_.~*'()", REGEX_OR) |
-                         (RegEx('%') + Hex() + Hex());
-  return e;
+inline const ConstRegEx& Chomp() { return Get<Patterns::Chomp>(); }
+inline const ConstRegEx& DisallowedFlow() {
+  return Get<Patterns::DisallowedFlow>();
 }
-
-// Plain scalar rules:
-// . Cannot start with a blank.
-// . Can never start with any of , [ ] { } # & * ! | > \' \" % @ `
-// . In the block context - ? : must be not be followed with a space.
-// . In the flow context ? is illegal and : and - must not be followed with a
-// space.
-inline const RegEx& PlainScalar() {
-  static const RegEx e =
-      !(BlankOrBreak() | RegEx(",[]{}#&*!|>\'\"%@`", REGEX_OR) |
-        (RegEx("-?:", REGEX_OR) + (BlankOrBreak() | RegEx())));
-  return e;
-}
-inline const RegEx& PlainScalarInFlow() {
-  static const RegEx e =
-      !(BlankOrBreak() | RegEx("?,[]{}#&*!|>\'\"%@`", REGEX_OR) |
-        (RegEx("-:", REGEX_OR) + (Blank() | RegEx())));
-  return e;
-}
-inline const RegEx& EndScalar() {
-  static const RegEx e = RegEx(':') + (BlankOrBreak() | RegEx());
-  return e;
-}
-inline const RegEx& EndScalarInFlow() {
-  static const RegEx e =
-      (RegEx(':') + (BlankOrBreak() | RegEx() | RegEx(",]}", REGEX_OR))) |
-      RegEx(",?[]{}", REGEX_OR);
-  return e;
-}
-
-inline const RegEx& ScanScalarEndInFlow() {
-  static const RegEx e = (EndScalarInFlow() | (BlankOrBreak() + Comment()));
-  return e;
-}
-
-inline const RegEx& ScanScalarEnd() {
-  static const RegEx e = EndScalar() | (BlankOrBreak() + Comment());
-  return e;
-}
-inline const RegEx& EscSingleQuote() {
-  static const RegEx e = RegEx("\'\'");
-  return e;
-}
-inline const RegEx& EscBreak() {
-  static const RegEx e = RegEx('\\') + Break();
-  return e;
-}
-
-inline const RegEx& ChompIndicator() {
-  static const RegEx e = RegEx("+-", REGEX_OR);
-  return e;
-}
-inline const RegEx& Chomp() {
-  static const RegEx e = (ChompIndicator() + Digit()) |
-                         (Digit() + ChompIndicator()) | ChompIndicator() |
-                         Digit();
-  return e;
+inline const ConstRegEx& DisallowedBlock() {
+  return Get<Patterns::DisallowedBlock>();
 }
 
 // and some functions

@@ -1,9 +1,23 @@
+#include <sstream>
+#include <type_traits>
+
+#include "exp.h"
 #include "regex_yaml.h"
 #include "stream.h"
 #include "gtest/gtest.h"
 
 using YAML::RegEx;
 using YAML::Stream;
+using YAML::StreamCharSource;
+
+constexpr YAML::ConstRegEx kSpaceExpression =
+    YAML::MakeConstRegEx<YAML::Exp::Patterns::Space>();
+static_assert(std::is_trivially_destructible<YAML::ConstRegEx>::value,
+              "ConstRegEx must remain trivially destructible");
+static_assert(kSpaceExpression.Matches(' '),
+              "space must match itself at compile time");
+static_assert(!kSpaceExpression.Matches('\t'),
+              "space must not match tabs at compile time");
 
 namespace {
 const auto MIN_CHAR = Stream::eof() + 1;
@@ -173,5 +187,46 @@ TEST(RegExTest, StringOr) {
   }
 
   EXPECT_EQ(1, ex.Match(str));
+}
+
+TEST(ConstRegExTest, FixedPatternsMatchBoundaries) {
+  EXPECT_EQ(3, YAML::Exp::Tag().Match(std::string("%21")));
+  EXPECT_EQ(3, YAML::Exp::URI().Match(std::string("%21")));
+  EXPECT_EQ(4, YAML::Exp::DocEnd().Match(std::string("...\n")));
+  EXPECT_EQ(-1, YAML::Exp::ValueInFlow().Match(std::string(":")));
+  EXPECT_EQ(2, YAML::Exp::ValueInFlow().Match(std::string(":,")));
+}
+
+TEST(ConstRegExTest, FixedPatternsCoverScalarBoundaries) {
+  EXPECT_EQ(1, YAML::Exp::PlainScalar().Match(std::string("a")));
+  EXPECT_EQ(-1, YAML::Exp::PlainScalar().Match(std::string(":")));
+  EXPECT_EQ(1, YAML::Exp::PlainScalarInFlow().Match(std::string("a")));
+  EXPECT_EQ(-1, YAML::Exp::PlainScalarInFlow().Match(std::string(":")));
+
+  EXPECT_EQ(1, YAML::Exp::SingleQuoteEnd().Match(std::string("'")));
+  EXPECT_EQ(-1, YAML::Exp::SingleQuoteEnd().Match(std::string("''")));
+  EXPECT_EQ(1, YAML::Exp::DoubleQuoteEnd().Match(std::string("\"")));
+  EXPECT_EQ(-1, YAML::Exp::DoubleQuoteEnd().Match(std::string("x")));
+
+  EXPECT_EQ(1, YAML::Exp::NotPrintable().Match(std::string("\x01")));
+  EXPECT_EQ(1, YAML::Exp::DisallowedBlock().Match(std::string("\t")));
+  EXPECT_EQ(3,
+            YAML::Exp::DisallowedBlock().Match(std::string("\xEF\xBB\xBF", 3)));
+  EXPECT_EQ(-1, YAML::Exp::DisallowedBlock().Match(std::string("a")));
+}
+
+TEST(ConstRegExTest, NegatedPatternsPreserveEmptySourceBoundary) {
+  EXPECT_EQ(1, YAML::Exp::PlainScalar().Match(std::string()));
+  EXPECT_EQ(1, YAML::Exp::PlainScalarInFlow().Match(std::string()));
+  EXPECT_EQ(1, YAML::Exp::Anchor().Match(std::string()));
+}
+
+TEST(ConstRegExTest, EmptyPatternMatchesStreamEnd) {
+  std::istringstream input("...");
+  Stream stream(input);
+  StreamCharSource source(stream);
+
+  EXPECT_EQ(3, YAML::Exp::DocEnd().Match(stream));
+  EXPECT_EQ(0, YAML::Exp::Empty().Match(source + 3));
 }
 }  // namespace

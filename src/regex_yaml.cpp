@@ -13,6 +13,8 @@ RegEx::RegEx(char a, char z) : m_op(REGEX_RANGE), m_a(a), m_z(z), m_params{} {}
 RegEx::RegEx(const std::string& str, REGEX_OP op)
     : m_op(op), m_a(0), m_z(0), m_params(str.begin(), str.end()) {}
 
+RegEx::~RegEx() = default;
+
 // combination constructors
 RegEx operator!(const RegEx& ex) {
   RegEx ret(REGEX_NOT);
