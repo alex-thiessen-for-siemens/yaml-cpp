@@ -57,13 +57,17 @@ limitation, and attribution. Remove formulaic AI wording, but do not add
 personality or claims that the diff and ledger cannot support. Never apply it
 to source, tests, public documentation, or upstream text.
 
-If the current work began on the private `llm-contribute` setup branch, use
-`export-clean-branch.sh` to create a contribution branch from the upstream
-base. That script carries only the contribution diff and leaves setup files
-out of the final tree. Inspect the staged file list before committing. Fold
-all review repairs before this export, inspect `git log BASE..HEAD`, and ensure
-the final comparison with the upstream base contains only contribution files
-and no correction-only commit.
+If the current work began from the private `llm-contribute` setup ref, keep
+the implementation worktree on its setup-backed temporary branch. Run
+`export-clean-branch.sh` from that worktree to create the contribution branch
+and staged diff in a separate worktree based on the upstream base. The script
+carries only the contribution diff and leaves private `.github` files and
+known setup research documents out of the clean tree. Inspect the staged file
+list in the separate worktree before committing. Fold all review repairs
+before this export, inspect `git log BASE..HEAD`, and ensure the final
+comparison with the upstream base contains only contribution files and no
+correction-only commit. Keep the implementation worktree available for any
+later skill or reviewer invocation.
 
 If the current CI, contribution rules, accepted patch patterns, or maintainer
 culture have changed since calibration, run

@@ -8,6 +8,15 @@ quality of the strongest recent accepted patches, not for the shortest answer.
 The GPT-5.6 Luna Medium quality bar is the calibration target, but evidence
 beats confidence and no model gets a pass without the checks below.
 
+Always work in a dedicated worktree created with the private setup overlay.
+The helper starts from a clean contribution base and commits only the setup
+files on the implementation branch. The implementation worktree must retain
+`.github/copilot-instructions.md`, the relevant skills, and the custom agents
+for the entire implementation and review loop. Never implement directly in
+the setup checkout or switch the implementation worktree to a clean
+upstream-only branch before the workflow finishes. The final clean branch
+belongs in a separate worktree.
+
 Use `/yaml-cpp-contribution-intake` before editing. Keep a private session
 evidence ledger. Read only the relevant source, tests, build files, and bounded
 history. Do not load vendored GoogleTest or paste full logs into context.
@@ -58,16 +67,18 @@ Work in this order:
    Do not churn on stylistic preferences. If the blocker was introduced by
    this feature, repair it in the feature commit or logical series; do not
    append a correction-only commit.
-7. Use `/yaml-cpp-upstream-readiness`. If this session started on the private
-   `llm-contribute` branch, commit the implementation on a temporary named
-   branch and run
-   `.github/skills/yaml-cpp-upstream-readiness/export-clean-branch.sh` to
-   create the final branch from the upstream base. Verify the staged file list
-   excludes all private setup paths. Before exporting or pushing, fold every
-   feature-introduced review repair with amend or fixup/autosquash and inspect
-   the complete commit history for correction-only commits. A published
-   branch may be force-pushed only after the user explicitly approves the
-   history rewrite.
+7. Use `/yaml-cpp-upstream-readiness`. Commit the implementation on a
+   temporary named branch in the setup-backed implementation worktree. Run
+   `.github/skills/yaml-cpp-upstream-readiness/export-clean-branch.sh` there
+   to create the final branch and staged diff in a separate worktree based on
+   the upstream base. Verify that the separate worktree excludes all private
+   setup paths, then commit and publish from that clean worktree. Keep the
+   implementation worktree on its setup-backed branch so the skills and agents
+   remain available for any final repair. Before exporting or pushing, fold
+   every feature-introduced review repair with amend or fixup/autosquash and
+   inspect the complete commit history for correction-only commits. A
+   published branch may be force-pushed only after the user explicitly
+   approves the history rewrite.
    If a reference comparison passed, put a `Reference verification:` block in
    the feature commit body with every reference name, exact version, schema or
    layer, and result. If none applies, put the explicit not-applicable reason

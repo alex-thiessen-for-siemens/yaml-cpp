@@ -3,7 +3,10 @@ name: yaml-cpp-evaluation-loop
 description: Run the deterministic yaml-cpp contribution evaluation loop with explicit tool decisions, focused repair, and a durable evidence ledger.
 ---
 
-Use this loop after intake and after each material repair:
+Use this loop after intake and after each material repair. Run it from the
+dedicated setup-backed implementation worktree, not from the clean export
+worktree. The implementation worktree is the source of truth until the final
+diff is exported.
 
 1. Update the private session evidence ledger with the hypothesis, changed
    files, current base, and the exact checks planned. Keep logs on disk and

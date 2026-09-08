@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -o errexit
+set -o nounset
+set -o pipefail
 
 usage() {
   printf '%s\n' \
     "Usage: export-clean-branch.sh NEW_BRANCH [BASE_REF]" \
-    "Create NEW_BRANCH from BASE_REF and stage only the contribution diff."
+    "       [EXPORT_WORKTREE]" \
+    "Create NEW_BRANCH and stage only the contribution diff in a separate" \
+    "worktree, leaving the setup-backed implementation worktree unchanged."
 }
 
-if (($# < 1 || $# > 2)); then
+if (($# < 1 || $# > 3)); then
   usage >&2
   exit 2
 fi
@@ -17,80 +21,98 @@ new_branch=$1
 base_ref=${2:-upstream/master}
 repo_root=$(git rev-parse --show-toplevel)
 current_branch=$(git branch --show-current)
+if (($# == 3)); then
+  export_worktree=$3
+else
+  export_worktree="${repo_root}.worktrees/${new_branch//\//-}"
+fi
 
-if [[ -z "$current_branch" ]]; then
+if [[ -z "${current_branch}" ]]; then
   printf '%s\n' "error: export must start from a named implementation branch" >&2
   exit 2
 fi
-if ! git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
-  printf 'error: base ref is unavailable: %s\n' "$base_ref" >&2
-  exit 2
-fi
 if ! git diff --quiet || ! git diff --cached --quiet; then
-  printf '%s\n' "error: commit implementation changes before exporting a clean branch" >&2
-  exit 2
-fi
-untracked_files=$(git ls-files --others --exclude-standard)
-if [[ -n "$untracked_files" ]]; then
   printf '%s\n' \
-    "error: export requires no untracked files; private setup could leak" >&2
-  printf '%s\n' "$untracked_files" >&2
+    "error: commit implementation changes before exporting a clean branch" \
+    >&2
   exit 2
 fi
-if git show-ref --verify --quiet "refs/heads/$new_branch"; then
-  printf 'error: branch already exists: %s\n' "$new_branch" >&2
+if ! git cat-file -e "HEAD:.github/copilot-instructions.md" ||
+  ! git cat-file -e "HEAD:.github/skills/unslop/SKILL.md" ||
+  ! git cat-file -e "HEAD:.github/agents/yaml-cpp-contributor.agent.md"; then
+  printf '%s\n' \
+    "error: active branch does not contain the private Copilot setup" >&2
+  exit 2
+fi
+if ! git rev-parse --verify "${base_ref}^{commit}" >/dev/null 2>&1; then
+  printf 'error: base ref is unavailable: %s\n' "${base_ref}" >&2
+  exit 2
+fi
+if git show-ref --verify --quiet "refs/heads/${new_branch}"; then
+  printf 'error: branch already exists: %s\n' "${new_branch}" >&2
+  exit 2
+fi
+if [[ -e "${export_worktree}" || -L "${export_worktree}" ]]; then
+  printf 'error: export worktree path already exists: %s\n' \
+    "${export_worktree}" >&2
   exit 2
 fi
 
 patch_file=$(mktemp)
 branch_created=false
+worktree_created=false
 cleanup_export() {
   local status=$?
   trap - EXIT
-  if ((status != 0)) && [[ "$branch_created" == true ]]; then
-    if [[ "$(git branch --show-current)" != "$current_branch" ]]; then
-      if ! git reset --quiet; then
-        printf '%s\n' "warning: failed to reset the incomplete export" >&2
-      fi
-      if ! git switch "$current_branch"; then
+  if ((status != 0)); then
+    if [[ "${worktree_created}" == true ]]; then
+      if ! git worktree remove --force "${export_worktree}"; then
         printf '%s\n' \
-          "error: failed to restore the original branch: $current_branch" >&2
-        exit "$status"
+          "warning: failed to remove incomplete export worktree" >&2
       fi
     fi
-    if ! git branch -D "$new_branch"; then
-      printf 'error: failed to remove incomplete branch: %s\n' "$new_branch" >&2
-      exit "$status"
+    if [[ "${branch_created}" == true ]] &&
+      git show-ref --verify --quiet "refs/heads/${new_branch}"; then
+      if ! git branch -D "${new_branch}"; then
+        printf 'warning: failed to remove incomplete branch: %s\n' \
+          "${new_branch}" >&2
+      fi
     fi
   fi
-  rm -f "$patch_file"
-  exit "$status"
+  rm -f -- "${patch_file}"
+  exit "${status}"
 }
 trap cleanup_export EXIT
-git diff --binary "$base_ref...HEAD" -- . \
-  ':(exclude).github/copilot-instructions.md' \
-  ':(exclude).github/instructions/**' \
-  ':(exclude).github/agents/**' \
-  ':(exclude).github/skills/**' \
-  ':(exclude)gaps.asciidoc' >"$patch_file"
 
-if [[ ! -s "$patch_file" ]]; then
-  printf '%s\n' "error: no contribution changes remain after excluding setup files" >&2
+git diff --binary "${base_ref}...HEAD" -- . \
+  ':(exclude).github/**' \
+  ':(exclude)abi-and-issues.asciidoc' \
+  ':(exclude)gaps.asciidoc' >"${patch_file}"
+
+if [[ ! -s "${patch_file}" ]]; then
+  printf '%s\n' \
+    "error: no contribution changes remain after excluding setup files" >&2
   exit 2
 fi
 
+parent_path=$(dirname -- "${export_worktree}")
+mkdir -p -- "${parent_path}"
+git worktree add -b "${new_branch}" "${export_worktree}" "${base_ref}"
 branch_created=true
-git switch -c "$new_branch" "$base_ref"
-git apply --check --index "$patch_file"
-git apply --index "$patch_file"
+worktree_created=true
 
-if git diff --cached --name-only |
-    grep -E '^\.github/(copilot-instructions\.md|instructions/|agents/|skills/)' \
-    >/dev/null; then
+git -C "${export_worktree}" apply --check --index "${patch_file}"
+git -C "${export_worktree}" apply --index "${patch_file}"
+
+if git -C "${export_worktree}" diff --cached --name-only |
+  grep -E '^\.github/' >/dev/null; then
   printf '%s\n' "error: setup files leaked into the exported branch" >&2
   exit 1
 fi
 
-printf 'Exported %s from %s. Review and commit the staged contribution.\n' \
-  "$new_branch" "$base_ref"
-git diff --cached --stat
+printf 'Exported %s from %s into %s.\n' \
+  "${new_branch}" "${base_ref}" "${export_worktree}"
+printf '%s\n' \
+  "Review and commit the staged contribution there. The implementation" \
+  "worktree remains on ${current_branch} with its skills and agents."
+git -C "${export_worktree}" diff --cached --stat

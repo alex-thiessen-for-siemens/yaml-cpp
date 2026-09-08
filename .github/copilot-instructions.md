@@ -5,6 +5,24 @@ requested behavior, or a clearly stated maintenance task. Before editing,
 inspect the relevant implementation, its owning tests, nearby invariants, and
 recent history. Do not guess from filenames or from an issue title alone.
 
+Keep the setup checkout and contribution checkout separate. The branch that
+contains these instructions, skills, and agents is private workflow
+infrastructure, not an upstream contribution. Before editing yaml-cpp code,
+run `.github/skills/yaml-cpp-contribution-intake/create-contribution-worktree.sh`
+from a setup checkout to create a dedicated implementation worktree. The
+helper starts from a clean base, overlays the setup files, and records that
+private overlay on the implementation branch. This prevents old source or
+research changes that happen to be present on a setup ref from entering the
+contribution. Run the contribution workflow from that worktree. Do not switch
+it to an upstream-only branch while skills or agents are still needed. At
+readiness time, use
+`.github/skills/yaml-cpp-upstream-readiness/export-clean-branch.sh` to create
+the upstream-ready branch in a second worktree. That exporter must leave the
+implementation worktree on its setup-backed branch. It excludes all private
+`.github` files and known setup research documents from the export. Never copy
+private setup files into the clean branch, and stop if the active worktree
+lacks the required setup files.
+
 Preserve the public API, ABI, C++11 support, exception contracts, and the
 platform behavior covered by the project. Treat public headers, exported
 symbols or classes, inline implementations, installed include paths, and

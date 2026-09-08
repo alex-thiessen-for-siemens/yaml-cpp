@@ -6,6 +6,18 @@ description: Investigate and scope a yaml-cpp bug, feature, or maintenance contr
 Treat the request as an engineering investigation, not as an instruction to
 edit the first plausible file.
 
+Before the numbered steps, confirm that the work is running in a dedicated
+implementation worktree created with the private setup overlay. From the
+setup checkout, use
+`.github/skills/yaml-cpp-contribution-intake/create-contribution-worktree.sh
+WORKTREE_PATH IMPLEMENTATION_BRANCH [SETUP_REF] [BASE_REF]`. The helper starts
+the implementation branch from `BASE_REF`, copies only the private `.github`
+setup from `SETUP_REF`, and commits that overlay. The implementation worktree
+must contain `.github/copilot-instructions.md`, the required skills, and the
+custom agents. Do not implement on the setup checkout or on a clean
+upstream-only branch, because those checkouts cannot discover the
+repository-local workflow.
+
 1. Record the requested behavior, observable failure or acceptance condition,
    intended base branch, and any user constraints in the session evidence
    ledger. Locate the ledger in the CLI session's private artifacts, not in
