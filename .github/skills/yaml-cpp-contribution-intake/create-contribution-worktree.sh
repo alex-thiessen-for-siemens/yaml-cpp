@@ -40,9 +40,12 @@ if ! git rev-parse --verify "${base_ref}^{commit}" >/dev/null 2>&1; then
   printf 'error: base ref is unavailable: %s\n' "${base_ref}" >&2
   exit 2
 fi
-if ! git cat-file -e "${setup_ref}:.github/copilot-instructions.md" ||
-  ! git cat-file -e "${setup_ref}:.github/skills/unslop/SKILL.md" ||
-  ! git cat-file -e "${setup_ref}:.github/agents/yaml-cpp-contributor.agent.md"; then
+setup_commit=$(git rev-parse --verify "${setup_ref}^{commit}")
+base_commit=$(git rev-parse --verify "${base_ref}^{commit}")
+if ! git cat-file -e "${setup_commit}:.github/copilot-instructions.md" ||
+  ! git cat-file -e "${setup_commit}:.github/skills/unslop/SKILL.md" ||
+  ! git cat-file -e \
+  "${setup_commit}:.github/agents/yaml-cpp-contributor.agent.md"; then
   printf '%s\n' \
     "error: setup ref does not contain the repository Copilot setup" >&2
   exit 2
@@ -84,11 +87,11 @@ cleanup_worktree() {
 trap cleanup_worktree EXIT
 
 git worktree add -b "${implementation_branch}" \
-  "${worktree_path}" "${base_ref}"
+  "${worktree_path}" "${base_commit}"
 branch_created=true
 worktree_created=true
 
-git -C "${worktree_path}" checkout "${setup_ref}" -- .github
+git -C "${worktree_path}" checkout "${setup_commit}" -- .github
 git -C "${worktree_path}" add -- .github
 git -C "${worktree_path}" commit \
   -m "Apply private Copilot setup" \
