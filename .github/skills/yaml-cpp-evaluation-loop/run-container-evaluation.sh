@@ -7,6 +7,7 @@ container_dir="$repo_root/.github/skills/yaml-cpp-evaluation-loop/container"
 docker_image=${YAML_CPP_EVAL_IMAGE:-yaml-cpp-copilot-eval:9.2.0}
 target_arch=${YAML_CPP_EVAL_ARCH:-}
 ledger_path=
+ledger_arg_index=-1
 
 if ! command -v docker >/dev/null 2>&1; then
   printf '%s\n' \
@@ -75,10 +76,14 @@ for ((index = 0; index < ${#args[@]}; index++)); do
       ;;
     --ledger)
       if ((index + 1 < ${#args[@]})); then
+        if ((ledger_arg_index >= 0)); then
+          printf '%s\n' "error: --ledger may be specified only once" >&2
+          exit 2
+        fi
         ledger_path=${args[index + 1]}
+        ledger_arg_index=$((index + 1))
         if [[ "$ledger_path" != /* ]]; then
           ledger_path="$repo_root/$ledger_path"
-          args[index + 1]=$ledger_path
         fi
       fi
       ;;
@@ -130,9 +135,24 @@ if [[ -n "$git_dir" && -d "$git_dir" ]]; then
 fi
 
 if [[ -n "$ledger_path" ]]; then
+  if [[ -L "$ledger_path" || -d "$ledger_path" ]]; then
+    printf '%s\n' \
+      "error: --ledger must name a regular file, not a directory or symlink" \
+      >&2
+    exit 2
+  fi
   ledger_dir=$(dirname "$ledger_path")
-  mkdir -p "$ledger_dir"
-  mounts+=(-v "$ledger_dir:$ledger_dir")
+  mkdir -p -- "$ledger_dir"
+  if [[ ! -e "$ledger_path" ]]; then
+    : >"$ledger_path"
+  fi
+  if [[ ! -f "$ledger_path" ]]; then
+    printf '%s\n' "error: --ledger path is not a regular file" >&2
+    exit 2
+  fi
+  container_ledger_path=/tmp/yaml-cpp-copilot-evidence.log
+  args[ledger_arg_index]=$container_ledger_path
+  mounts+=(-v "$ledger_path:$container_ledger_path")
 fi
 
 printf 'Running yaml-cpp evaluator in %s (%s)\n' "$docker_image" "$target_arch"

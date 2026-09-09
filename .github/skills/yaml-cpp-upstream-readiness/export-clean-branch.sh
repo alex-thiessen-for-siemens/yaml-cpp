@@ -92,6 +92,14 @@ require_yaml_cpp_signing_key
   "${base_ref}..HEAD"
 if [[ -e "${export_worktree}" || -L "${export_worktree}" ]]; then
   if [[ "${force}" == true ]]; then
+    existing_worktree_branch=$(git -C "${export_worktree}" \
+      branch --show-current 2>/dev/null || true)
+    if [[ "${existing_worktree_branch}" != "${new_branch}" ]]; then
+      printf '%s\n' \
+        "error: --force target is not the requested export worktree branch" \
+        >&2
+      exit 2
+    fi
     printf 'Removing existing worktree at %s due to --force...\n' \
       "${export_worktree}"
     if ! git worktree remove --force "${export_worktree}"; then
@@ -109,6 +117,12 @@ if [[ -e "${export_worktree}" || -L "${export_worktree}" ]]; then
 fi
 if git show-ref --verify --quiet "refs/heads/${new_branch}"; then
   if [[ "${force}" == true ]]; then
+    if [[ "${existing_worktree_branch:-}" != "${new_branch}" ]]; then
+      printf '%s\n' \
+        "error: --force refuses to delete a branch without its export worktree" \
+        >&2
+      exit 2
+    fi
     printf 'Removing existing branch %s due to --force...\n' "${new_branch}"
     git branch -D "${new_branch}"
   else
