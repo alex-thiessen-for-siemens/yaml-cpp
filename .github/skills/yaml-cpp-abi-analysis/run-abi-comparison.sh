@@ -77,6 +77,12 @@ while (($# > 0)); do
   esac
 done
 
+if [[ -n "$probe_file" && ! -f "$probe_file" ]]; then
+  printf 'error: probe file is not a readable regular file: %s\n' \
+    "$probe_file" >&2
+  exit 2
+fi
+
 # If inside container already, do not re-invoke docker
 if [[ -f /.dockerenv || -n "${YAML_CPP_INSIDE_CONTAINER:-}" ]]; then
   mode_docker="no"
@@ -290,7 +296,7 @@ if command -v abidiff >/dev/null 2>&1; then
   abidiff_status=$?
   set -e
   if grep -Eq \
-    '^(Functions|Variables) changes summary: ([1-9][0-9]* Removed|[0-9]+ Removed, [1-9][0-9]* Changed|[0-9]+ Removed, [0-9]+ Changed, [1-9][0-9]* Added)' \
+    '^[[:space:]]*(Functions|Variables) changes summary: ([1-9][0-9]* Removed|[0-9]+ Removed, [1-9][0-9]* Changed|[0-9]+ Removed, [0-9]+ Changed, [1-9][0-9]* Added)' \
     "$abidiff_report"; then
     abidiff_structural_changes=true
   fi
@@ -307,7 +313,7 @@ fi
 
 printf '[6/6] Executing bidirectional consumer skew probes...\n'
 probe_src="$output_dir/consumer_probe.cpp"
-if [[ -n "$probe_file" && -f "$probe_file" ]]; then
+if [[ -n "$probe_file" ]]; then
   cp "$probe_file" "$probe_src"
 else
   cat <<'PROBE_EOF' > "$probe_src"
@@ -345,12 +351,18 @@ probe1_bin="$output_dir/probe_oldheaders_newlib"
 probe1_err="$output_dir/probe1_compile_err.log"
 if "$probe_cxx" -std=c++11 -I "$baseline_dir/include" "$probe_src" \
     -L "$(dirname "$candidate_so")" -lyaml-cpp -o "$probe1_bin" >"$probe1_err" 2>&1; then
-  probe1_out=$(LD_LIBRARY_PATH="$(dirname "$candidate_so"):${LD_LIBRARY_PATH:-}" "$probe1_bin" 2>&1 || true)
-  if [[ "$probe1_out" =~ OK ]]; then
-    skew_1_pass=true
-    printf '  Skew 1 (old headers + new library): PASS\n'
+  if probe1_out=$(LD_LIBRARY_PATH="$(dirname "$candidate_so"):${LD_LIBRARY_PATH:-}" \
+    "$probe1_bin" 2>&1); then
+    if [[ "$probe1_out" =~ OK ]]; then
+      skew_1_pass=true
+      printf '  Skew 1 (old headers + new library): PASS\n'
+    else
+      printf '  Skew 1 (old headers + new library): FAIL (run output: %s)\n' \
+        "$probe1_out"
+    fi
   else
-    printf '  Skew 1 (old headers + new library): FAIL (run output: %s)\n' "$probe1_out"
+    printf '  Skew 1 (old headers + new library): FAIL (nonzero exit; output: %s)\n' \
+      "$probe1_out"
   fi
 else
   printf '  Skew 1 (old headers + new library): COMPILE_FAIL (see %s)\n' "$probe1_err"
@@ -361,12 +373,18 @@ probe2_bin="$output_dir/probe_newheaders_oldlib"
 probe2_err="$output_dir/probe2_compile_err.log"
 if "$probe_cxx" -std=c++11 -I "$candidate_dir/include" "$probe_src" \
     -L "$(dirname "$baseline_so")" -lyaml-cpp -o "$probe2_bin" >"$probe2_err" 2>&1; then
-  probe2_out=$(LD_LIBRARY_PATH="$(dirname "$baseline_so"):${LD_LIBRARY_PATH:-}" "$probe2_bin" 2>&1 || true)
-  if [[ "$probe2_out" =~ OK ]]; then
-    skew_2_pass=true
-    printf '  Skew 2 (new headers + old library): PASS\n'
+  if probe2_out=$(LD_LIBRARY_PATH="$(dirname "$baseline_so"):${LD_LIBRARY_PATH:-}" \
+    "$probe2_bin" 2>&1); then
+    if [[ "$probe2_out" =~ OK ]]; then
+      skew_2_pass=true
+      printf '  Skew 2 (new headers + old library): PASS\n'
+    else
+      printf '  Skew 2 (new headers + old library): FAIL (run output: %s)\n' \
+        "$probe2_out"
+    fi
   else
-    printf '  Skew 2 (new headers + old library): FAIL (run output: %s)\n' "$probe2_out"
+    printf '  Skew 2 (new headers + old library): FAIL (nonzero exit; output: %s)\n' \
+      "$probe2_out"
   fi
 else
   printf '  Skew 2 (new headers + old library): COMPILE_FAIL (see %s)\n' "$probe2_err"
@@ -416,6 +434,7 @@ if [[ "$skew_1_pass" != true || "$skew_2_pass" != true ]]; then
 fi
 if ! $abidiff_available; then
   overall_verdict="ABI evidence incomplete (abidiff was not executed)"
+  exit_code=1
 fi
 
 printf 'Conclusion:       %s\n' "$overall_verdict"
