@@ -248,7 +248,7 @@ fi
 is_ignored_untracked_file() {
   local candidate=$1
   case "$candidate" in
-    build*/*|*/build*/*|CMakeFiles/*|*/CMakeFiles/*|CompilerId*/*|*/CompilerId*/*|CMakeCache.txt|*/CMakeCache.txt|*.o|*.a|*.so|*.dylib|*.dll|*.ninja*|*.log)
+    build/*|build[0-9]*/*|build-*/*|cmake-build-*/*|CMakeFiles/*|*/CMakeFiles/*|CompilerId*/*|*/CompilerId*/*|CMakeCache.txt|*/CMakeCache.txt|*.o|*.a|*.so|*.dylib|*.dll|*.ninja*|*.log)
       return 0
       ;;
   esac

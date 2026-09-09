@@ -70,6 +70,21 @@ if [[ -z "${current_branch}" ]]; then
   printf '%s\n' "error: export must start from a named implementation branch" >&2
   exit 2
 fi
+if [[ "${new_branch}" == "${current_branch}" ]]; then
+  printf '%s\n' \
+    "error: export branch must differ from the implementation branch" >&2
+  exit 2
+fi
+if [[ -e "${export_worktree}" || -L "${export_worktree}" ]]; then
+  repo_root_real=$(cd -P -- "${repo_root}" && pwd)
+  export_worktree_real=$(cd -P -- "${export_worktree}" && pwd)
+  if [[ "${export_worktree_real}" == "${repo_root_real}" ]]; then
+    printf '%s\n' \
+      "error: export worktree must differ from the implementation worktree" \
+      >&2
+    exit 2
+  fi
+fi
 if ! git diff --quiet || ! git diff --cached --quiet; then
   printf '%s\n' \
     "error: commit implementation changes before exporting a clean branch" \

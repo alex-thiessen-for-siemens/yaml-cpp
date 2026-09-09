@@ -83,6 +83,55 @@ if [[ -n "$probe_file" && ! -f "$probe_file" ]]; then
   exit 2
 fi
 
+mkdir -p -- "$output_dir"
+output_dir=$(cd -- "$output_dir" && pwd)
+candidate_host_dir=
+if [[ -n "$candidate_arg" && -d "$candidate_arg" ]]; then
+  candidate_host_dir=$(cd -- "$candidate_arg" && pwd)
+fi
+probe_host_file=
+if [[ -n "$probe_file" ]]; then
+  probe_host_file=$(cd -- "$(dirname "$probe_file")" && pwd)/$(basename "$probe_file")
+fi
+container_path_for_host() {
+  local path=$1
+  case "$path" in
+    "$repo_root")
+      printf '%s\n' "/workspace"
+      ;;
+    "$repo_root"/*)
+      printf '/workspace/%s\n' "${path#"$repo_root"/}"
+      ;;
+    *)
+      printf '%s\n' "$path"
+      ;;
+  esac
+}
+candidate_container_path=
+if [[ -n "$candidate_host_dir" ]]; then
+  candidate_container_path=$(container_path_for_host "$candidate_host_dir")
+fi
+probe_container_path=
+if [[ -n "$probe_host_file" ]]; then
+  probe_container_path=$(container_path_for_host "$probe_host_file")
+fi
+output_container_path=$(container_path_for_host "$output_dir")
+for ((index = 0; index + 1 < ${#original_args[@]}; index++)); do
+  case "${original_args[index]}" in
+    --candidate)
+      [[ -n "$candidate_container_path" ]] &&
+        original_args[index + 1]=$candidate_container_path
+      ;;
+    --output-dir)
+      original_args[index + 1]=$output_container_path
+      ;;
+    --probe)
+      [[ -n "$probe_container_path" ]] &&
+        original_args[index + 1]=$probe_container_path
+      ;;
+  esac
+done
+
 # If inside container already, do not re-invoke docker
 if [[ -f /.dockerenv || -n "${YAML_CPP_INSIDE_CONTAINER:-}" ]]; then
   mode_docker="no"
@@ -113,27 +162,22 @@ if [[ "$mode_docker" == "yes" ]] || { [[ "$mode_docker" == "auto" ]] && ! comman
       esac
     fi
 
-    if [[ -n "$candidate_arg" && -d "$candidate_arg" ]]; then
-      candidate_host_dir=$(cd "$candidate_arg" && pwd)
+    if [[ -n "$candidate_host_dir" ]]; then
       case "$candidate_host_dir" in
         "$repo_root"|"$repo_root"/*) ;;
         *) mounts+=(-v "$candidate_host_dir:$candidate_host_dir:ro") ;;
       esac
     fi
-    if [[ -n "$probe_file" && -f "$probe_file" ]]; then
-      probe_host_file=$(cd "$(dirname "$probe_file")" && pwd)/$(basename "$probe_file")
+    if [[ -n "$probe_host_file" ]]; then
       case "$probe_host_file" in
         "$repo_root"|"$repo_root"/*) ;;
         *) mounts+=(-v "$probe_host_file:$probe_host_file:ro") ;;
       esac
     fi
-    if [[ "$output_dir" == /* ]]; then
-      mkdir -p "$output_dir"
-      case "$output_dir" in
-        "$repo_root"|"$repo_root"/*) ;;
-        *) mounts+=(-v "$output_dir:$output_dir") ;;
-      esac
-    fi
+    case "$output_dir" in
+      "$repo_root"|"$repo_root"/*) ;;
+      *) mounts+=(-v "$output_dir:$output_dir") ;;
+    esac
 
     user_name=$(id -un)
     exec docker run --rm \
