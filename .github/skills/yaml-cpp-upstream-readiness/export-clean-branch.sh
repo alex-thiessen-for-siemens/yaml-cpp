@@ -94,7 +94,12 @@ if [[ -e "${export_worktree}" || -L "${export_worktree}" ]]; then
   if [[ "${force}" == true ]]; then
     printf 'Removing existing worktree at %s due to --force...\n' \
       "${export_worktree}"
-    git worktree remove --force "${export_worktree}" 2>/dev/null || rm -rf "${export_worktree}"
+    if ! git worktree remove --force "${export_worktree}"; then
+      printf '%s\n' \
+        "error: existing path is not a removable Git worktree; remove it manually" \
+        >&2
+      exit 2
+    fi
     git worktree prune
   else
     printf 'error: export worktree path already exists: %s\n' \

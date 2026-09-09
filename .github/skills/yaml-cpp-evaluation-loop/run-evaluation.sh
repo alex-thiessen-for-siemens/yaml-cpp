@@ -175,7 +175,7 @@ tool_state() {
   fi
 }
 
-tools=(cmake ctest clang-format clang-tidy cppcheck valgrind bazel bzlmod compiler)
+tools=(cmake ctest clang-format clang-tidy cppcheck valgrind abidiff bazel bzlmod compiler)
 printf '%s\n' "yaml-cpp local evaluator tool inventory"
 printf '%s\n' "repository: $repo_root"
 for tool in "${tools[@]}"; do

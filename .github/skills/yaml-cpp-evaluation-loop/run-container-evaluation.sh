@@ -157,7 +157,7 @@ if [[ -n "$ledger_path" ]]; then
     "${docker_args[@]}" \
       "$docker_image" \
       bash -c \
-      'for tool in bazel cmake clang-format clang-tidy cppcheck valgrind; do
+      'for tool in abidiff bazel cmake clang-format clang-tidy cppcheck valgrind; do
          printf "%s: " "$tool"
          "$tool" --version 2>&1 | head -1
        done

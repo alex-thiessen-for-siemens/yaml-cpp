@@ -107,6 +107,28 @@ if [[ "$mode_docker" == "yes" ]] || { [[ "$mode_docker" == "auto" ]] && ! comman
       esac
     fi
 
+    if [[ -n "$candidate_arg" && -d "$candidate_arg" ]]; then
+      candidate_host_dir=$(cd "$candidate_arg" && pwd)
+      case "$candidate_host_dir" in
+        "$repo_root"|"$repo_root"/*) ;;
+        *) mounts+=(-v "$candidate_host_dir:$candidate_host_dir:ro") ;;
+      esac
+    fi
+    if [[ -n "$probe_file" && -f "$probe_file" ]]; then
+      probe_host_file=$(cd "$(dirname "$probe_file")" && pwd)/$(basename "$probe_file")
+      case "$probe_host_file" in
+        "$repo_root"|"$repo_root"/*) ;;
+        *) mounts+=(-v "$probe_host_file:$probe_host_file:ro") ;;
+      esac
+    fi
+    if [[ "$output_dir" == /* ]]; then
+      mkdir -p "$output_dir"
+      case "$output_dir" in
+        "$repo_root"|"$repo_root"/*) ;;
+        *) mounts+=(-v "$output_dir:$output_dir") ;;
+      esac
+    fi
+
     user_name=$(id -un)
     exec docker run --rm \
       --user "$(id -u):$(id -g)" \
@@ -171,7 +193,7 @@ printf 'Output:    %s\n\n' "$output_dir"
 
 printf '[1/6] Building baseline shared library...\n'
 cmake -S "$baseline_dir" -B "$baseline_build" \
-  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DBUILD_SHARED_LIBS=ON \
   -DYAML_CPP_BUILD_TESTS=OFF \
   -DYAML_CPP_BUILD_TOOLS=OFF \
@@ -181,7 +203,7 @@ cmake --build "$baseline_build" --target yaml-cpp --parallel >/dev/null
 
 printf '[2/6] Building candidate shared library...\n'
 cmake -S "$candidate_dir" -B "$candidate_build" \
-  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DBUILD_SHARED_LIBS=ON \
   -DYAML_CPP_BUILD_TESTS=OFF \
   -DYAML_CPP_BUILD_TOOLS=OFF \
@@ -229,13 +251,13 @@ fi
 printf '[4/6] Comparing exported dynamic symbols...\n'
 baseline_syms="$output_dir/baseline_symbols.txt"
 candidate_syms="$output_dir/candidate_symbols.txt"
-nm -D --defined-only "$baseline_so" | awk '{print $2, $3}' | sort -u > "$baseline_syms"
-nm -D --defined-only "$candidate_so" | awk '{print $2, $3}' | sort -u > "$candidate_syms"
+nm -D --defined-only "$baseline_so" | awk '{print $3}' | sort -u > "$baseline_syms"
+nm -D --defined-only "$candidate_so" | awk '{print $3}' | sort -u > "$candidate_syms"
 
 baseline_syms_demangled="$output_dir/baseline_symbols_demangled.txt"
 candidate_syms_demangled="$output_dir/candidate_symbols_demangled.txt"
-nm -D -C --defined-only "$baseline_so" | awk '{print $2, substr($0, index($0,$3))}' | sort -u > "$baseline_syms_demangled"
-nm -D -C --defined-only "$candidate_so" | awk '{print $2, substr($0, index($0,$3))}' | sort -u > "$candidate_syms_demangled"
+c++filt <"$baseline_syms" | sort -u >"$baseline_syms_demangled"
+c++filt <"$candidate_syms" | sort -u >"$candidate_syms_demangled"
 
 removed_syms=$(comm -23 "$baseline_syms" "$candidate_syms" | wc -l)
 added_syms=$(comm -13 "$baseline_syms" "$candidate_syms" | wc -l)
@@ -255,6 +277,7 @@ printf '[5/6] Running libabigail (abidiff)...\n'
 abidiff_report="$output_dir/abidiff_report.txt"
 abidiff_available=false
 abidiff_status=0
+abidiff_structural_changes=false
 
 if command -v abidiff >/dev/null 2>&1; then
   abidiff_available=true
@@ -266,6 +289,11 @@ if command -v abidiff >/dev/null 2>&1; then
     "$baseline_so" "$candidate_so" > "$abidiff_report" 2>&1
   abidiff_status=$?
   set -e
+  if grep -Eq \
+    '^(Functions|Variables) changes summary: ([1-9][0-9]* Removed|[0-9]+ Removed, [1-9][0-9]* Changed|[0-9]+ Removed, [0-9]+ Changed, [1-9][0-9]* Added)' \
+    "$abidiff_report"; then
+    abidiff_structural_changes=true
+  fi
   if [[ $abidiff_status -eq 0 ]]; then
     printf '  abidiff: NO ABI INCOMPATIBILITIES DETECTED (exit 0)\n'
   else
@@ -371,9 +399,14 @@ if ((removed_syms > 0)); then
   exit_code=1
 fi
 if $abidiff_available && [[ $abidiff_status -ne 0 ]]; then
-  # abidiff exit code: bit 1 (1) means error, bit 2 (4) means change, bit 3 (8) means incompatible change
-  if (( (abidiff_status & 8) != 0 || (abidiff_status & 1) != 0 )); then
+  if [[ "$abidiff_structural_changes" == true ]]; then
     overall_verdict="ABI BREAKAGE: Incompatible structural ABI change detected by abidiff"
+    exit_code=1
+  elif (( (abidiff_status & 1) != 0 )); then
+    overall_verdict="ABI evidence incomplete (abidiff failed)"
+    exit_code=1
+  else
+    overall_verdict="ABI differences require review (symbol-only changes)"
     exit_code=1
   fi
 fi
