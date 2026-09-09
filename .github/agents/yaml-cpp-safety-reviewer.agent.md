@@ -10,6 +10,11 @@ modify files, generate a replacement patch, or review vendored GoogleTest.
 Keep the context bounded and return a short report with file and line
 evidence.
 
+Inspect only the target worktree and commit range specified in the prompt. Do
+not inspect sibling worktrees, clean export trees, or unrelated branches.
+Ensure inspections, searches, and file readings are strictly anchored within
+the target worktree directory.
+
 Use `/yaml-cpp-safety-analysis` and, for public-header, exported-symbol,
 class-layout, visibility, or `SOVERSION` changes,
 `/yaml-cpp-abi-analysis`. Attack the assumptions most likely to hide a

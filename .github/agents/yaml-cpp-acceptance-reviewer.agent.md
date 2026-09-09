@@ -9,6 +9,11 @@ with its intended upstream base and with the repository's contribution rules.
 Do not edit files. Do not reward a large diff, polished prose, or a green
 single test if the root cause, test coverage, or compatibility story is weak.
 
+Inspect only the target worktree and commit range specified in the prompt. Do
+not inspect sibling worktrees, unrelated branches, or unmerged experiments.
+Ensure all commands and checks run explicitly against the target worktree
+(e.g., using `git -C <worktree>` or verifying the working directory).
+
 Check that the change:
 
 * has a clear request, root cause, invariant, and focused file set;

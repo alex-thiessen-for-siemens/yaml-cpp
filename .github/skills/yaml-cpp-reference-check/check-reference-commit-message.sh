@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: check-reference-commit-message.sh --commit REF \
+Usage: check-reference-commit-message.sh [--commit] REF \
   [--upstream] (--reference "NAME VERSION" ... | --not-applicable REASON)
 
 Check that the commit body contains a versioned Reference verification block
@@ -63,15 +63,20 @@ while (($# > 0)); do
       exit 0
       ;;
     *)
-      printf 'error: unknown option: %s\n' "$1" >&2
-      usage >&2
-      exit 2
+      if [[ -z "$commit" ]] && ! [[ "$1" =~ ^- ]]; then
+        commit=$1
+        shift
+      else
+        printf 'error: unknown option: %s\n' "$1" >&2
+        usage >&2
+        exit 2
+      fi
       ;;
   esac
 done
 
 if [[ -z "$commit" ]]; then
-  printf '%s\n' "error: --commit is required" >&2
+  printf '%s\n' "error: commit ref is required (pass REF or --commit REF)" >&2
   usage >&2
   exit 2
 fi
@@ -214,14 +219,18 @@ if [[ -n "$not_applicable" ]]; then
       >&2
     exit 1
   fi
-  if ! grep -Fq -- "$not_applicable" <<<"$body"; then
+  normalized_body=$(printf '%s' "$body" | tr '\n' ' ' | tr -s ' ')
+  normalized_reason=$(printf '%s' "$not_applicable" | tr '\n' ' ' | tr -s ' ')
+  if ! grep -Fq -- "$normalized_reason" <<<"$normalized_body"; then
     printf '%s\n' \
       "error: commit body lacks the not-applicable reason" >&2
     exit 1
   fi
 else
+  normalized_body=$(printf '%s' "$body" | tr '\n' ' ' | tr -s ' ')
   for reference in "${references[@]}"; do
-    if ! grep -Fq -- "$reference" <<<"$body"; then
+    normalized_ref=$(printf '%s' "$reference" | tr '\n' ' ' | tr -s ' ')
+    if ! grep -Fq -- "$normalized_ref" <<<"$normalized_body"; then
       printf 'error: commit body lacks reference and version: %s\n' \
         "$reference" >&2
       exit 1

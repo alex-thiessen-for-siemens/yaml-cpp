@@ -68,12 +68,16 @@ Do not treat these facts as a substitute for a current comparison:
    decision and keep the change off an upstream-compatible branch until that
    decision is made.
 4. Prefer a shared-library comparison against the last released baseline
-   using `abidiff` or `abipkgdiff` when either tool is installed. Record the
-   exact compiler, standard library, build flags, shared/static options,
-   target architecture, baseline artifact, candidate artifact, tool version,
-   command, and result. A missing tool is a coverage limitation, not a pass;
-   ask the user whether to install it or explicitly waive the ABI check before
-   continuing. Do not install host software silently.
+   using `run-abi-comparison.sh` (or `abidiff`/`abipkgdiff` directly). The
+   runner `.github/skills/yaml-cpp-abi-analysis/run-abi-comparison.sh`
+   automates SONAME verification, dynamic symbol diffing, libabigail analysis
+   (using the Docker evaluation container fallback if host tools are missing),
+   and bidirectional old/new consumer skew probes. Record the exact compiler,
+   standard library, build flags, shared/static options, target architecture,
+   baseline artifact, candidate artifact, tool version, command, and result.
+   A missing tool is a coverage limitation, not a pass; ask the user whether
+   to install it or explicitly waive the ABI check before continuing. Do not
+   install host software silently.
 5. Use `readelf -d` to record SONAMEs and a demangled exported-symbol list as
    a fast diagnostic when libabigail is unavailable. Treat symbol presence as
    incomplete evidence: it does not prove class-layout, inline, calling

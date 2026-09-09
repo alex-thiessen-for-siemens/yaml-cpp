@@ -10,23 +10,58 @@ source "${script_dir}/../yaml-cpp-contribution-intake/commit-signing-policy.sh"
 
 usage() {
   printf '%s\n' \
-    "Usage: export-clean-branch.sh NEW_BRANCH [BASE_REF]" \
+    "Usage: export-clean-branch.sh [-f|--force] NEW_BRANCH [BASE_REF]" \
     "       [EXPORT_WORKTREE]" \
     "Create NEW_BRANCH and stage only the contribution diff in a separate" \
-    "worktree, leaving the setup-backed implementation worktree unchanged."
+    "worktree, leaving the setup-backed implementation worktree unchanged." \
+    "Options:" \
+    "  -f, --force    Overwrite existing export branch and worktree directory."
 }
 
-if (($# < 1 || $# > 3)); then
+force=false
+positional=()
+
+while (($# > 0)); do
+  case "$1" in
+    -f|--force)
+      force=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      while (($# > 0)); do
+        positional+=("$1")
+        shift
+      done
+      break
+      ;;
+    -*)
+      printf 'error: unknown option: %s\n' "$1" >&2
+      usage >&2
+      exit 2
+      ;;
+    *)
+      positional+=("$1")
+      shift
+      ;;
+  esac
+done
+
+if ((${#positional[@]} < 1 || ${#positional[@]} > 3)); then
   usage >&2
   exit 2
 fi
 
-new_branch=$1
-base_ref=${2:-upstream/master}
+new_branch=${positional[0]}
+base_ref=${positional[1]:-upstream/master}
 repo_root=$(git rev-parse --show-toplevel)
 current_branch=$(git branch --show-current)
-if (($# == 3)); then
-  export_worktree=$3
+if ((${#positional[@]} == 3)); then
+  export_worktree=${positional[2]}
 else
   export_worktree="${repo_root}.worktrees/${new_branch//\//-}"
 fi
@@ -55,14 +90,26 @@ fi
 require_yaml_cpp_signing_key
 "${script_dir}/../yaml-cpp-contribution-intake/check-commit-signatures.sh" \
   "${base_ref}..HEAD"
-if git show-ref --verify --quiet "refs/heads/${new_branch}"; then
-  printf 'error: branch already exists: %s\n' "${new_branch}" >&2
-  exit 2
-fi
 if [[ -e "${export_worktree}" || -L "${export_worktree}" ]]; then
-  printf 'error: export worktree path already exists: %s\n' \
-    "${export_worktree}" >&2
-  exit 2
+  if [[ "${force}" == true ]]; then
+    printf 'Removing existing worktree at %s due to --force...\n' \
+      "${export_worktree}"
+    git worktree remove --force "${export_worktree}" 2>/dev/null || rm -rf "${export_worktree}"
+    git worktree prune
+  else
+    printf 'error: export worktree path already exists: %s\n' \
+      "${export_worktree}" >&2
+    exit 2
+  fi
+fi
+if git show-ref --verify --quiet "refs/heads/${new_branch}"; then
+  if [[ "${force}" == true ]]; then
+    printf 'Removing existing branch %s due to --force...\n' "${new_branch}"
+    git branch -D "${new_branch}"
+  else
+    printf 'error: branch already exists: %s\n' "${new_branch}" >&2
+    exit 2
+  fi
 fi
 
 patch_file=$(mktemp)

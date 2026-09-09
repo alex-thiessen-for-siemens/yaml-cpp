@@ -16,6 +16,7 @@ Options:
   --build-root DIR         Build directory root (default: build/copilot-eval).
   --ledger FILE            Append results to a private evidence ledger.
   --waive TOOL             Explicitly waive TOOL (repeatable).
+  --build-tools            Explicitly enable utility and benchmark tool targets.
   --help                   Show this help.
 
 Useful waiver names are: clang-format, clang-tidy, cppcheck, valgrind, bazel,
@@ -35,6 +36,7 @@ inventory_only=false
 base_ref=${BASE_REF:-upstream/master}
 build_root=${BUILD_ROOT:-"$repo_root/build/copilot-eval"}
 ledger=${EVIDENCE_LEDGER:-}
+build_tools=${BUILD_TOOLS:-auto}
 declare -a waivers=()
 
 while (($# > 0)); do
@@ -62,6 +64,10 @@ while (($# > 0)); do
       (($# >= 2)) || { printf '%s\n' "error: --waive needs a tool" >&2; exit 2; }
       waivers+=("$2")
       shift 2
+      ;;
+    --build-tools)
+      build_tools=ON
+      shift
       ;;
     --help|-h)
       usage
@@ -239,6 +245,23 @@ if ((missing > 0)); then
   exit 3
 fi
 
+is_ignored_untracked_file() {
+  local candidate=$1
+  case "$candidate" in
+    build*|*/build*|*CMakeFiles*|*CompilerId*|CMakeCache.txt|*.o|*.a|*.so|*.dylib|*.dll|*.ninja*|*.log)
+      return 0
+      ;;
+  esac
+  case "$candidate" in
+    src/*|include/*|test/*|util/*|.github/*|CMakeLists.txt|*.bazel|*.bzl|WORKSPACE*)
+      return 1
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
 changed_files=()
 if git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
   diff_base="$base_ref"
@@ -250,15 +273,30 @@ while IFS= read -r file; do
   [[ -n "$file" ]] && changed_files+=("$file")
 done < <(git diff --name-only "$diff_base")
 while IFS= read -r file; do
-  [[ -n "$file" ]] && changed_files+=("$file")
+  [[ -n "$file" ]] || continue
+  is_ignored_untracked_file "$file" && continue
+  changed_files+=("$file")
 done < <(git ls-files --others --exclude-standard)
 if ((${#changed_files[@]} > 0)); then
   mapfile -t changed_files < <(printf '%s\n' "${changed_files[@]}" | sort -u)
 fi
 
+if [[ "$build_tools" == "auto" ]]; then
+  build_tools="OFF"
+  for file in "${changed_files[@]}"; do
+    case "$file" in
+      util/*)
+        build_tools="ON"
+        break
+        ;;
+    esac
+  done
+fi
+
 cpp_files=()
 source_files=()
 for file in "${changed_files[@]}"; do
+  [[ -f "$file" ]] || continue
   case "$file" in
     *.h|*.hpp|*.cc|*.cpp|*.cxx)
       cpp_files+=("$file")
@@ -409,7 +447,7 @@ debug_build="$build_root/cmake-cxx11-debug"
 run_step "cmake configure C++11 debug" cmake -S "$repo_root" -B "$debug_build" \
   -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_STANDARD_REQUIRED=ON \
   -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-  -DYAML_CPP_BUILD_TESTS=ON -DYAML_CPP_BUILD_TOOLS=OFF \
+  -DYAML_CPP_BUILD_TESTS=ON -DYAML_CPP_BUILD_TOOLS="$build_tools" \
   -DYAML_CPP_FORMAT_SOURCE=OFF -DYAML_USE_SYSTEM_GTEST=OFF \
   -DCMAKE_CXX_FLAGS_DEBUG="-g -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC"
 run_step "cmake build C++11 debug" cmake --build "$debug_build" --parallel
@@ -451,7 +489,7 @@ if require_tool sanitizer; then
     run_step "cmake configure sanitizers" cmake -S "$repo_root" -B "$sanitizer_build" \
       -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_STANDARD_REQUIRED=ON \
       -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-      -DYAML_CPP_BUILD_TESTS=ON -DYAML_CPP_BUILD_TOOLS=OFF \
+      -DYAML_CPP_BUILD_TESTS=ON -DYAML_CPP_BUILD_TOOLS="$build_tools" \
       -DYAML_CPP_FORMAT_SOURCE=OFF -DYAML_USE_SYSTEM_GTEST=OFF \
       -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -g" \
       -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"

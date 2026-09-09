@@ -98,6 +98,37 @@ docker build \
   "$container_dir"
 
 mounts=(-v "$repo_root:/workspace")
+
+git_common_dir=$(git rev-parse --git-common-dir 2>/dev/null || true)
+if [[ -n "$git_common_dir" && "$git_common_dir" != /* ]]; then
+  if ! git_common_dir=$(cd "$repo_root/$git_common_dir" 2>/dev/null && pwd); then
+    git_common_dir=""
+  fi
+fi
+if [[ -n "$git_common_dir" && -d "$git_common_dir" ]]; then
+  case "$git_common_dir" in
+    "$repo_root"/*) ;;
+    *)
+      mounts+=(-v "$git_common_dir:$git_common_dir:ro")
+      ;;
+  esac
+fi
+
+git_dir=$(git rev-parse --git-dir 2>/dev/null || true)
+if [[ -n "$git_dir" && "$git_dir" != /* ]]; then
+  if ! git_dir=$(cd "$repo_root/$git_dir" 2>/dev/null && pwd); then
+    git_dir=""
+  fi
+fi
+if [[ -n "$git_dir" && -d "$git_dir" ]]; then
+  case "$git_dir" in
+    "$repo_root"/*|"${git_common_dir:-}"/*) ;;
+    *)
+      mounts+=(-v "$git_dir:$git_dir:ro")
+      ;;
+  esac
+fi
+
 if [[ -n "$ledger_path" ]]; then
   ledger_dir=$(dirname "$ledger_path")
   mkdir -p "$ledger_dir"
@@ -111,6 +142,9 @@ docker_args=(
   --user "$(id -u):$(id -g)"
   --env HOME=/tmp/copilot-home
   --env "USER=$user_name"
+  --env GIT_CONFIG_COUNT=1
+  --env GIT_CONFIG_KEY_0=safe.directory
+  --env "GIT_CONFIG_VALUE_0=*"
   --ulimit nofile=65536:65536
   --workdir /workspace
   "${mounts[@]}"
@@ -119,6 +153,7 @@ docker_args=(
 if [[ -n "$ledger_path" ]]; then
   {
     printf '## container toolchain %s (%s)\n' "$docker_image" "$target_arch"
+    # shellcheck disable=SC2016
     "${docker_args[@]}" \
       "$docker_image" \
       bash -c \
