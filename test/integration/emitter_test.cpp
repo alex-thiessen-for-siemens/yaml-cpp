@@ -465,6 +465,22 @@ TEST_F(EmitterTest, LiteralWithAndWithoutTrailingEmptyLines) {
       "- something");
 }
 
+TEST_F(EmitterTest, SingleQuotedWithCarriageReturn) {
+  out << BeginMap;
+  out << Key << "key" << Value << SingleQuoted << "a\rb";
+  out << EndMap;
+
+  ExpectEmit("key: \"a\\rb\"");
+}
+
+TEST_F(EmitterTest, LiteralWithCarriageReturn) {
+  out << BeginMap;
+  out << Key << "key" << Value << Literal << "a\rb";
+  out << EndMap;
+
+  ExpectEmit("key: \"a\\rb\"");
+}
+
 
 TEST_F(EmitterTest, AutoLongKeyScalar) {
   out << BeginMap;
@@ -819,6 +835,26 @@ TEST_F(EmitterTest, MultiLineComment) {
   ExpectEmit(
       "- item 1  # really really long\n          # comment that couldn't "
       "possibly\n          # fit on one line\n- item 2");
+}
+
+TEST_F(EmitterTest, MultiLineCommentWithCarriageReturn) {
+  out << BeginSeq;
+  out << "item 1" << Comment("really long\rcomment on two lines");
+  out << "item 2";
+  out << EndSeq;
+
+  ExpectEmit(
+      "- item 1  # really long\n          # comment on two lines\n- item 2");
+}
+
+TEST_F(EmitterTest, MultiLineCommentWithCarriageReturnLineFeed) {
+  out << BeginSeq;
+  out << "item 1" << Comment("really long\r\ncomment on two lines");
+  out << "item 2";
+  out << EndSeq;
+
+  ExpectEmit(
+      "- item 1  # really long\n          # comment on two lines\n- item 2");
 }
 
 TEST_F(EmitterTest, ComplexComments) {
