@@ -11,6 +11,10 @@ constexpr YAML::RegEx kSpaceExpression =
     YAML::MakeRegEx<YAML::Exp::Patterns::Space>();
 static_assert(std::is_trivially_destructible<YAML::RegEx>::value,
               "RegEx must remain trivially destructible");
+static_assert(std::is_trivially_destructible<YAML::Detail::CharBitSet>::value,
+              "CharBitSet must remain trivially destructible");
+static_assert(std::is_trivially_copyable<YAML::RegEx>::value,
+              "RegEx must remain trivially copyable");
 static_assert(kSpaceExpression.Matches(' '),
               "space must match itself at compile time");
 static_assert(!kSpaceExpression.Matches('\t'),
